@@ -1,54 +1,54 @@
-.pie-pagina {
+.footer {
     background: #2c3e50;
-    color: blanco;
+    color: white;
     padding: 3rem 0 1rem;
     margin-top: auto;
 }
 
-.pie-pagina .contenedor {
+.footer .container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 2rem;
 }
 
-.contenido-pie {
+.footer-content {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
     gap: 2rem;
     margin-bottom: 2rem;
 }
 
-.seccion-pie h3,
-.seccion-pie h4 {
+.footer-section h3,
+.footer-section h4 {
     margin-bottom: 1rem;
     color: #ecf0f1;
 }
 
-.seccion-pie p {
+.footer-section p {
     margin: 0.5rem 0;
     color: #bdc3c7;
 }
 
-.seccion-pie ul {
+.footer-section ul {
     list-style: none;
     padding: 0;
 }
 
-.seccion-pie ul li {
+.footer-section ul li {
     margin-bottom: 0.5rem;
 }
 
-.seccion-pie ul li a {
+.footer-section ul li a {
     color: #bdc3c7;
     text-decoration: none;
     transition: color 0.3s ease;
 }
 
-.seccion-pie ul li a:hover {
+.footer-section ul li a:hover {
     color: #3498db;
 }
 
-.base-pie {
+.footer-bottom {
     border-top: 1px solid #34495e;
     padding-top: 1rem;
     text-align: center;

@@ -1,40 +1,40 @@
 {% extends 'base.html' %}
 
-{% block titulo %}Solicitud de Adopción - {{ mascota.nombre }}{% endblock %}
+{% block title %}Solicitud de Adopción - {{ mascota.nombre }}{% endblock %}
 
-{% block contenido %}
-<section class="solicitud-adopcion">
-    <div class="contenedor">
-        <div class="encabezado-solicitud">
+{% block content %}
+<section class="adoption-request">
+    <div class="container">
+        <div class="request-header">
             <h1>Solicitud de Adopción</h1>
             <p>Estás solicitando adoptar a <strong>{{ mascota.nombre }}</strong></p>
-            <div class="info-cola">
-                <span class="badge-cola">Posición en cola: #{{ cantidad_solicitudes|add:1 }}</span>
+            <div class="queue-info">
+                <span class="queue-badge">Posición en cola: #{{ cantidad_solicitudes|add:1 }}</span>
             </div>
         </div>
 
-        <div class="contenido-solicitud">
-            <div class="resumen-mascota">
+        <div class="request-content">
+            <div class="pet-summary">
                 <img src="{{ mascota.foto.url }}" alt="{{ mascota.nombre }}">
                 <h3>{{ mascota.nombre }}</h3>
                 <p>{{ mascota.raza }} • {{ mascota.edad }} años • {{ mascota.get_tamaño_display }}</p>
             </div>
 
-            <div class="formulario-solicitud">
+            <div class="request-form">
                 <form method="post">
                     {% csrf_token %}
-                    <div class="grupo-formulario">
-                        <label for="{{ formulario.notas.id_for_label }}">¿Por qué quieres adoptar a {{ mascota.nombre }}?</label>
-                        {{ formulario.notas }}
-                        {% if formulario.notas.errors %}
-                        <div class="error">{{ formulario.notas.errors }}</div>
+                    <div class="form-group">
+                        <label for="{{ form.notas.id_for_label }}">¿Por qué quieres adoptar a {{ mascota.nombre }}?</label>
+                        {{ form.notas }}
+                        {% if form.notas.errors %}
+                        <div class="error">{{ form.notas.errors }}</div>
                         {% endif %}
-                        <p class="texto-ayuda">Describe tu hogar, experiencia con mascotas y por qué serías un buen dueño.</p>
+                        <p class="help-text">Describe tu hogar, experiencia con mascotas y por qué serías un buen dueño.</p>
                     </div>
                     
-                    <div class="acciones-formulario">
-                        <button type="submit" class="boton boton-primario">Enviar Solicitud</button>
-                        <a href="{% url 'detalle_mascota' mascota.id %}" class="boton boton-secundario">Cancelar</a>
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary">Enviar Solicitud</button>
+                        <a href="{% url 'pet_detail' mascota.id %}" class="btn btn-secondary">Cancelar</a>
                     </div>
                 </form>
             </div>

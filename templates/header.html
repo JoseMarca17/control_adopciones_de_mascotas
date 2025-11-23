@@ -1,39 +1,39 @@
-<header class="encabezado-principal">
-    <div class="contenedor">
+<header class="header">
+    <div class="container">
         <div class="logo">
-            <h1><a href="{% url 'inicio' %}">🐾 Adopta un Amigo</a></h1>
+            <h1><a href="/">🐾 Adopta un Amigo</a></h1>
         </div>
         
-        <nav class="navegacion-principal">
-            <ul class="menu">
-                <li><a href="{% url 'inicio' %}">Inicio</a></li>
-                <li><a href="{% url 'catalogo' %}">Mascotas</a></li>
+        <nav class="nav">
+            <ul class="nav-menu">
+                <li><a href="/">Inicio</a></li>
+                <li><a href="/catalogo/">Mascotas</a></li>
             </ul>
             
-            <div class="menu-usuario">
+            <div class="user-menu">
                 {% if user.is_authenticated %}
-                    <div class="dropdown-usuario">
-                        <button class="boton-perfil">
-                            👤 {{ user.first_name|default:user.username }}
+                    <div class="user-dropdown">
+                        <button class="user-btn">
+                            👤 {{ user.first_name|default:user.email }}
                         </button>
-                        <div class="dropdown-contenido">
-                            <a href="{% url 'panel_administracion' %}" class="{% if not user.is_staff and not user.groups.all.0.name == 'Administrador' %}oculto{% endif %}">
-                                🏠 Panel Admin
-                            </a>
-                            <a href="{% url 'agregar_mascota' %}" class="{% if not user.is_staff and not user.groups.all.0.name == 'Administrador' %}oculto{% endif %}">
-                                ➕ Agregar Mascota
-                            </a>
-                            <a href="{% url 'reportes' %}" class="{% if not user.is_staff and not user.groups.all.0.name == 'Administrador' %}oculto{% endif %}">
-                                📊 Reportes
-                            </a>
-                            <a href="#" class="opcion-perfil">👤 Mi Perfil</a>
-                            <a href="{% url 'cerrar_sesion' %}" class="opcion-salir">🚪 Cerrar Sesión</a>
+                        <div class="dropdown-content">
+                            {% if user.is_authenticated and user.es_administrador %}
+                                <a href="/admin/panel/">🏠 Panel Admin</a>
+                                <a href="/admin/agregar-mascota/">➕ Agregar Mascota</a>
+                                <a href="/admin/procesar-solicitudes/">📋 Procesar Solicitudes</a>
+                                <a href="/admin/reportes/">📊 Reportes</a>
+                            {% elif user.is_authenticated and user.es_adoptante and user.perfil_adoptante %}
+                                <span class="user-role">Adoptante</span>
+                            {% else %}
+                                <a href="/registrar-adoptante/">📝 Completar Perfil</a>
+                            {% endif %}
+                            <a href="/logout/" class="logout-btn">🚪 Cerrar Sesión</a>
                         </div>
                     </div>
                 {% else %}
-                    <div class="botones-autenticacion">
-                        <a href="{% url 'iniciar_sesion' %}" class="boton boton-secundario">Iniciar Sesión</a>
-                        <a href="{% url 'iniciar_sesion' %}" class="boton boton-primario">Registrarse</a>
+                    <div class="auth-buttons">
+                        <a href="/login/" class="btn btn-secondary">Iniciar Sesión</a>
+                        <a href="/login/" class="btn btn-primary">Registrarse</a>
                     </div>
                 {% endif %}
             </div>

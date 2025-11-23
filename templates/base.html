@@ -3,23 +3,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block titulo %}Adopción de Mascotas{% endblock %}</title>
+    <title>{% block title %}Adopción de Mascotas{% endblock %}</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/principal.css' %}">
     <link rel="stylesheet" href="{% static 'css/header.css' %}">
     <link rel="stylesheet" href="{% static 'css/footer.css' %}">
+    <link rel="stylesheet" href="{% static 'css/main.css' %}">
     <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+    {% block extra_css %}{% endblock %}
 </head>
 <body>
-    {% include 'encabezado.html' %}
+    {% include 'header.html' %}
     
-    <main class="contenido-principal">
-        {% block contenido %}
+    <main class="main-content">
+        {% if messages %}
+        <div class="messages-container">
+            {% for message in messages %}
+            <div class="message {{ message.tags }}">
+                {{ message }}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+        
+        {% block content %}
         {% endblock %}
     </main>
     
     {% include 'footer.html' %}
     
-    <script src="{% static 'js/principal.js' %}"></script>
+    <script src="{% static 'js/main.js' %}"></script>
 </body>
 </html>

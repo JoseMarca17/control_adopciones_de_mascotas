@@ -1,63 +1,104 @@
 {% extends 'base.html' %}
 
-{% block titulo %}Completar Registro - Adopción de Mascotas{% endblock %}
+{% block title %}Completar Registro - Adopción de Mascotas{% endblock %}
 
-{% block contenido %}
-<section class="registro-adoptante">
-    <div class="contenedor">
-        <div class="encabezado-registro">
+{% block content %}
+<section class="register-adopter">
+    <div class="container">
+        <div class="register-header">
             <h1>Completar Información de Adoptante</h1>
             <p>Necesitamos algunos datos adicionales para procesar tus solicitudes de adopción</p>
         </div>
 
-        <div class="formulario-registro">
+        <div class="register-form">
             <form method="post">
                 {% csrf_token %}
                 
-                <div class="grid-formulario">
-                    <div class="grupo-formulario">
-                        <label for="{{ formulario.first_name.id_for_label }}">Nombre</label>
-                        {{ formulario.first_name }}
-                        {% if formulario.first_name.errors %}
-                        <div class="error">{{ formulario.first_name.errors }}</div>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="{{ form.first_name.id_for_label }}">Nombre</label>
+                        {{ form.first_name }}
+                        {% if form.first_name.errors %}
+                        <div class="error">{{ form.first_name.errors }}</div>
                         {% endif %}
                     </div>
                     
-                    <div class="grupo-formulario">
-                        <label for="{{ formulario.last_name.id_for_label }}">Apellido</label>
-                        {{ formulario.last_name }}
-                        {% if formulario.last_name.errors %}
-                        <div class="error">{{ formulario.last_name.errors }}</div>
+                    <div class="form-group">
+                        <label for="{{ form.last_name.id_for_label }}">Apellido</label>
+                        {{ form.last_name }}
+                        {% if form.last_name.errors %}
+                        <div class="error">{{ form.last_name.errors }}</div>
                         {% endif %}
                     </div>
                 </div>
                 
-                <div class="grupo-formulario">
-                    <label for="{{ formulario.telefono.id_for_label }}">Teléfono</label>
-                    {{ formulario.telefono }}
-                    {% if formulario.telefono.errors %}
-                    <div class="error">{{ formulario.telefono.errors }}</div>
+                <div class="form-group">
+                    <label for="{{ form.telefono.id_for_label }}">Teléfono</label>
+                    {{ form.telefono }}
+                    {% if form.telefono.errors %}
+                    <div class="error">{{ form.telefono.errors }}</div>
                     {% endif %}
                 </div>
                 
-                <div class="grupo-formulario">
-                    <label for="{{ formulario.direccion.id_for_label }}">Dirección Completa</label>
-                    {{ formulario.direccion }}
-                    {% if formulario.direccion.errors %}
-                    <div class="error">{{ formulario.direccion.errors }}</div>
+                <div class="form-group">
+                    <label for="{{ form.direccion.id_for_label }}">Dirección Completa</label>
+                    {{ form.direccion }}
+                    {% if form.direccion.errors %}
+                    <div class="error">{{ form.direccion.errors }}</div>
                     {% endif %}
                 </div>
                 
-                <div class="grupo-formulario">
-                    <label for="{{ formulario.numero_identificacion.id_for_label }}">Número de Identificación</label>
-                    {{ formulario.numero_identificacion }}
-                    {% if formulario.numero_identificacion.errors %}
-                    <div class="error">{{ formulario.numero_identificacion.errors }}</div>
+                <div class="form-group">
+                    <label for="{{ form.numero_identificacion.id_for_label }}">Número de Identificación</label>
+                    {{ form.numero_identificacion }}
+                    {% if form.numero_identificacion.errors %}
+                    <div class="error">{{ form.numero_identificacion.errors }}</div>
                     {% endif %}
                 </div>
                 
-                <div class="acciones-formulario">
-                    <button type="submit" class="boton boton-primario">Completar Registro</button>
+                <div class="form-group">
+                    <label for="{{ form.ocupacion.id_for_label }}">Ocupación</label>
+                    {{ form.ocupacion }}
+                    {% if form.ocupacion.errors %}
+                    <div class="error">{{ form.ocupacion.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.experiencia_mascotas.id_for_label }}">Experiencia con Mascotas</label>
+                    {{ form.experiencia_mascotas }}
+                    {% if form.experiencia_mascotas.errors %}
+                    <div class="error">{{ form.experiencia_mascotas.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="{{ form.tipo_vivienda.id_for_label }}">Tipo de Vivienda</label>
+                        {{ form.tipo_vivienda }}
+                        {% if form.tipo_vivienda.errors %}
+                        <div class="error">{{ form.tipo_vivienda.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            {{ form.tiene_patio }} ¿Tiene patio?
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.otras_mascotas.id_for_label }}">Otras Mascotas en Casa</label>
+                    {{ form.otras_mascotas }}
+                    {% if form.otras_mascotas.errors %}
+                    <div class="error">{{ form.otras_mascotas.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Completar Registro</button>
+                    <a href="{% url 'catalog' %}" class="btn btn-secondary">Cancelar</a>
                 </div>
             </form>
         </div>

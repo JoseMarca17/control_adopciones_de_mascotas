@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block title %}Mascotas Disponibles - Adopción de Mascotas{% endblock %}
+
+{% block content %}
+<section class="catalog-header">
+    <div class="container">
+        <h1>Nuestras Mascotas</h1>
+        <p>Conoce a los increíbles animales que buscan un hogar</p>
+    </div>
+</section>
+
+<section class="catalog">
+    <div class="container">
+        <div class="filters">
+            <select id="filter-type">
+                <option value="all">Todos los tipos</option>
+                <option value="perro">Perros</option>
+                <option value="gato">Gatos</option>
+            </select>
+            <select id="filter-size">
+                <option value="all">Todos los tamaños</option>
+                <option value="pequeño">Pequeño</option>
+                <option value="mediano">Mediano</option>
+                <option value="grande">Grande</option>
+            </select>
+        </div>
+
+        <div class="pets-grid">
+            {% for mascota in mascotas %}
+            <div class="pet-card" data-type="{{ mascota.tipo_mascota }}" data-size="{{ mascota.tamaño }}">
+                <div class="pet-image">
+                    {% if mascota.foto %}
+                    <img src="{{ mascota.foto.url }}" alt="{{ mascota.nombre }}">
+                    {% else %}
+                    <img src="/static/images/default-pet.jpg" alt="{{ mascota.nombre }}">
+                    {% endif %}
+                    <div class="pet-type-badge">{{ mascota.get_tipo_mascota_display }}</div>
+                </div>
+                <div class="pet-info">
+                    <h3>{{ mascota.nombre }}</h3>
+                    <p class="pet-breed">{{ mascota.raza }}</p>
+                    <p class="pet-age">{{ mascota.edad }} años</p>
+                    <p class="pet-size">{{ mascota.get_tamaño_display }}</p>
+                    <p class="pet-description">{{ mascota.descripcion|truncatewords:20 }}</p>
+                    <div class="pet-actions">
+                        <!-- CORREGIDO: usar nombres correctos de URLs -->
+                        <a href="{% url 'adopciones:detalles_mascota' mascota.id %}" class="btn btn-secondary">Ver Detalles</a>
+                        
+                        {% if user.is_authenticated %}
+                            {% if user.perfiladoptante %}
+                            <a href="{% url 'adopciones:solicitud_adopcion' mascota.id %}" class="btn btn-primary">Solicitar Adopción</a>
+                            {% else %}
+                            <a href="{% url 'adopciones:registrar_adoptante' %}" class="btn btn-primary">Completar Perfil para Adoptar</a>
+                            {% endif %}
+                        {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-primary">Iniciar Sesión para Adoptar</a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="no-pets">
+                <h3>No hay mascotas disponibles en este momento</h3>
+                <p>Vuelve pronto para conocer a nuestros nuevos amigos.</p>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterType = document.getElementById('filter-type');
+    const filterSize = document.getElementById('filter-size');
+    const petCards = document.querySelectorAll('.pet-card');
+
+    function filterPets() {
+        const selectedType = filterType.value;
+        const selectedSize = filterSize.value;
+
+        petCards.forEach(card => {
+            const type = card.getAttribute('data-type');
+            const size = card.getAttribute('data-size');
+
+            const typeMatch = selectedType === 'all' || type === selectedType;
+            const sizeMatch = selectedSize === 'all' || size === selectedSize;
+
+            if (typeMatch && sizeMatch) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none';
+            }
+        });
+    }
+
+    filterType.addEventListener('change', filterPets);
+    filterSize.addEventListener('change', filterPets);
+});
+</script>
+{% endblock %}
+{% endblock %}

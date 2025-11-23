@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block title %}Procesar Solicitudes - {{ mascota.nombre }}{% endblock %}
+
+{% block content %}
+<section class="process-pet-requests">
+    <div class="container">
+        <div class="process-header">
+            <h1>Procesar Solicitudes para {{ mascota.nombre }}</h1>
+            <div class="queue-info">
+                <span class="queue-badge">{{ cantidad_solicitudes }} solicitudes en cola</span>
+            </div>
+        </div>
+
+        {% if solicitud_actual %}
+        <div class="current-request">
+            <div class="request-card">
+                <div class="applicant-info">
+                    <h3>Solicitante: {{ solicitud_actual.adoptante.get_nombre_completo }}</h3>
+                    <p><strong>Email:</strong> {{ solicitud_actual.adoptante.email }}</p>
+                    <p><strong>Teléfono:</strong> {{ solicitud_actual.adoptante.telefono }}</p>
+                    <p><strong>Dirección:</strong> {{ solicitud_actual.adoptante.direccion }}</p>
+                    
+                    {% if solicitud_actual.adoptante.perfil_adoptante %}
+                    <div class="applicant-profile">
+                        <h4>Información del Adoptante:</h4>
+                        <p><strong>Ocupación:</strong> {{ solicitud_actual.adoptante.perfil_adoptante.ocupacion }}</p>
+                        <p><strong>Experiencia:</strong> {{ solicitud_actual.adoptante.perfil_adoptante.experiencia_mascotas }}</p>
+                        <p><strong>Vivienda:</strong> {{ solicitud_actual.adoptante.perfil_adoptante.get_tipo_vivienda_display }}</p>
+                        <p><strong>Patio:</strong> {{ solicitud_actual.adoptante.perfil_adoptante.tiene_patio|yesno:"Sí,No" }}</p>
+                        <p><strong>Otras mascotas:</strong> {{ solicitud_actual.adoptante.perfil_adoptante.otras_mascotas|default:"Ninguna" }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="request-notes">
+                    <h4>Motivos de la adopción:</h4>
+                    <p>{{ solicitud_actual.notas|default:"No se proporcionaron notas." }}</p>
+                </div>
+                
+                <form method="post" class="decision-form">
+                    {% csrf_token %}
+                    <div class="form-actions">
+                        <button type="submit" name="accion" value="aceptar" class="btn btn-success">Aceptar Solicitud</button>
+                        <button type="submit" name="accion" value="rechazar" class="btn btn-danger">Rechazar Solicitud</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        {% else %}
+        <div class="no-requests">
+            <h3>No hay más solicitudes para esta mascota</h3>
+            <p>Todas las solicitudes han sido procesadas.</p>
+            <a href="{% url 'process_requests' %}" class="btn btn-primary">Volver a la lista</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+{% endblock %}

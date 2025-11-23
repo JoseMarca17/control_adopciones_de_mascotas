@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+
+{% block title %}Añadir Mascota{% endblock %}
+
+{% block content %}
+<section class="add-pet">
+    <div class="container">
+        <h1>Añadir Nueva Mascota</h1>
+        
+        <form method="post" enctype="multipart/form-data" class="pet-form">
+            {% csrf_token %}
+            
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="{{ form.nombre.id_for_label }}">Nombre</label>
+                    {{ form.nombre }}
+                    {% if form.nombre.errors %}
+                    <div class="error">{{ form.nombre.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.tipo_mascota.id_for_label }}">Tipo</label>
+                    {{ form.tipo_mascota }}
+                    {% if form.tipo_mascota.errors %}
+                    <div class="error">{{ form.tipo_mascota.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.raza.id_for_label }}">Raza</label>
+                    {{ form.raza }}
+                    {% if form.raza.errors %}
+                    <div class="error">{{ form.raza.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.edad.id_for_label }}">Edad (años)</label>
+                    {{ form.edad }}
+                    {% if form.edad.errors %}
+                    <div class="error">{{ form.edad.errors }}</div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.tamaño.id_for_label }}">Tamaño</label>
+                    {{ form.tamaño }}
+                    {% if form.tamaño.errors %}
+                    <div class="error">{{ form.tamaño.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.descripcion.id_for_label }}">Descripción</label>
+                {{ form.descripcion }}
+                {% if form.descripcion.errors %}
+                <div class="error">{{ form.descripcion.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="form-group">
+                <label for="{{ form.foto.id_for_label }}">Foto</label>
+                {{ form.foto }}
+                {% if form.foto.errors %}
+                <div class="error">{{ form.foto.errors }}</div>
+                {% endif %}
+            </div>
+            
+            <div class="medical-info">
+                <h3>Información Médica</h3>
+                <div class="form-grid">
+                    <div class="form-group checkbox-group">
+                        <label class="checkbox-label">
+                            {{ form.vacunado }} Vacunado
+                        </label>
+                    </div>
+                    
+                    <div class="form-group checkbox-group">
+                        <label class="checkbox-label">
+                            {{ form.esterilizado }} Esterilizado
+                        </label>
+                    </div>
+                    
+                    <div class="form-group checkbox-group">
+                        <label class="checkbox-label">
+                            {{ form.desparasitado }} Desparasitado
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="{{ form.observaciones_medicas.id_for_label }}">Observaciones Médicas</label>
+                    {{ form.observaciones_medicas }}
+                    {% if form.observaciones_medicas.errors %}
+                    <div class="error">{{ form.observaciones_medicas.errors }}</div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Guardar Mascota</button>
+                <a href="{% url 'adopciones:dashboard' %}" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,96 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Panel de Administración - Adopción de Mascotas{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-main">
+    <div class="dashboard-container">
+        <!-- Header -->
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">🏠 Panel de Administración</h1>
+            <p class="dashboard-subtitle">Gestión central del sistema de adopciones</p>
+        </div>
+        
+        <!-- Stats Cards -->
+        <div class="dashboard-stats">
+            <div class="dashboard-stat">
+                <div class="stat-icon">🐕‍🦺</div>
+                <div class="stat-content">
+                    <h3>Total Mascotas</h3>
+                    <p class="stat-number">{{ total_mascotas }}</p>
+                    <p class="stat-desc">En el sistema</p>
+                </div>
+            </div>
+            
+            <div class="dashboard-stat available">
+                <div class="stat-icon">🏠</div>
+                <div class="stat-content">
+                    <h3>Disponibles</h3>
+                    <p class="stat-number">{{ mascotas_disponibles }}</p>
+                    <p class="stat-desc">Buscando hogar</p>
+                </div>
+            </div>
+            
+            <div class="dashboard-stat pending">
+                <div class="stat-icon">⏳</div>
+                <div class="stat-content">
+                    <h3>Solicitudes</h3>
+                    <p class="stat-number">{{ solicitudes_pendientes }}</p>
+                    <p class="stat-desc">Por procesar</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Acciones Rápidas -->
+        <div class="dashboard-actions">
+            <h2 class="actions-title">🚀 Acciones Rápidas</h2>
+            <div class="actions-grid">
+                <a href="{% url 'adopciones:agregar_mascota' %}" class="action-link">
+                    <div class="action-link-icon">➕</div>
+                    <div class="action-link-content">
+                        <h3>Agregar Mascota</h3>
+                        <p>Registrar nueva mascota en el sistema</p>
+                    </div>
+                    <div class="action-link-arrow">→</div>
+                </a>
+                
+                <a href="{% url 'adopciones:procesar_solicitud' %}" class="action-link">
+                    <div class="action-link-icon">📋</div>
+                    <div class="action-link-content">
+                        <h3>Procesar Solicitudes</h3>
+                        <p>Revisar y gestionar adopciones</p>
+                    </div>
+                    <div class="action-link-arrow">→</div>
+                </a>
+                
+                <a href="{% url 'adopciones:reports' %}" class="action-link">
+                    <div class="action-link-icon">📊</div>
+                    <div class="action-link-content">
+                        <h3>Ver Reportes</h3>
+                        <p>Estadísticas y reportes del sistema</p>
+                    </div>
+                    <div class="action-link-arrow">→</div>
+                </a>
+            </div>
+        </div>
+
+        <!-- Actividad Reciente -->
+        <div class="dashboard-activity">
+            <div class="activity-title-section">
+                <h2 class="activity-title">📈 Actividad Reciente</h2>
+                <span class="activity-badge">Próximamente</span>
+            </div>
+            <div class="activity-placeholder">
+                <div class="placeholder-icon">📊</div>
+                <p class="placeholder-text">Aquí podrás ver la actividad reciente del sistema</p>
+                <small class="placeholder-small">Las métricas detalladas estarán disponibles pronto</small>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

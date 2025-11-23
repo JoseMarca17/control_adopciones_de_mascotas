@@ -1,45 +1,63 @@
 {% extends 'base.html' %}
 
-{% block titulo %}{{ mascota.nombre }} - Adopción de Mascotas{% endblock %}
+{% block title %}{{ mascota.nombre }} - Adopción de Mascotas{% endblock %}
 
-{% block contenido %}
-<section class="detalle-mascota">
-    <div class="contenedor">
-        <div class="contenido-detalle">
-            <div class="imagen-mascota-grande">
+{% block content %}
+<section class="pet-detail">
+    <div class="container">
+        <div class="pet-detail-content">
+            <div class="pet-image-large">
                 <img src="{{ mascota.foto.url }}" alt="{{ mascota.nombre }}">
             </div>
-            <div class="info-mascota-detalle">
+            <div class="pet-info-detail">
                 <h1>{{ mascota.nombre }}</h1>
-                <div class="meta-mascota">
-                    <span class="tipo-mascota">{{ mascota.get_tipo_mascota_display }}</span>
-                    <span class="raza-mascota">{{ mascota.raza }}</span>
-                    <span class="edad-mascota">{{ mascota.edad }} años</span>
-                    <span class="tamaño-mascota">{{ mascota.get_tamaño_display }}</span>
+                <div class="pet-meta">
+                    <span class="pet-type">{{ mascota.get_tipo_mascota_display }}</span>
+                    <span class="pet-breed">{{ mascota.raza }}</span>
+                    <span class="pet-age">{{ mascota.edad }} años</span>
+                    <span class="pet-size">{{ mascota.get_tamaño_display }}</span>
                 </div>
                 
-                <div class="estadisticas-solicitudes">
-                    <div class="info-solicitudes">
-                        <span class="numero-solicitudes">{{ cantidad_solicitudes }}</span>
-                        <span class="texto-solicitudes">personas interesadas</span>
+                <div class="request-stats">
+                    <div class="request-info">
+                        <span class="request-count">{{ cantidad_solicitudes }}</span>
+                        <span class="request-text">personas interesadas</span>
                     </div>
                 </div>
                 
-                <div class="descripcion-completa">
+                <div class="pet-description-full">
                     <h3>Sobre {{ mascota.nombre }}</h3>
                     <p>{{ mascota.descripcion }}</p>
                 </div>
                 
-                {% if user.is_authenticated and not user.is_staff and not user.groups.all.0.name == 'Administrador' %}
-                <div class="seccion-adopcion">
-                    <a href="{% url 'solicitar_adopcion' mascota.id %}" class="boton boton-primario boton-grande">
+                <div class="pet-medical-info">
+                    <h3>Información Médica</h3>
+                    <div class="medical-badges">
+                        {% if mascota.vacunado %}
+                        <span class="medical-badge vaccinated">✓ Vacunado</span>
+                        {% endif %}
+                        {% if mascota.esterilizado %}
+                        <span class="medical-badge sterilized">✓ Esterilizado</span>
+                        {% endif %}
+                        {% if mascota.desparasitado %}
+                        <span class="medical-badge dewormed">✓ Desparasitado</span>
+                        {% endif %}
+                    </div>
+                    {% if mascota.observaciones_medicas %}
+                    <p class="medical-notes">{{ mascota.observaciones_medicas }}</p>
+                    {% endif %}
+                </div>
+                
+                {% if user.is_authenticated and usuario_tiene_perfil_adoptante %}
+                <div class="adoption-section">
+                    <a href="{% url 'adoption_request' mascota.id %}" class="btn btn-primary btn-large">
                         🏠 Solicitar Adopción
                     </a>
-                    <p class="texto-ayuda">Serás agregado a la lista de espera para esta mascota</p>
+                    <p class="help-text">Serás agregado a la lista de espera para esta mascota</p>
                 </div>
                 {% elif not user.is_authenticated %}
-                <div class="aviso-inicio-sesion">
-                    <p>¿Te interesa adoptar a {{ mascota.nombre }}? <a href="{% url 'iniciar_sesion' %}">Inicia sesión</a> para solicitar la adopción.</p>
+                <div class="login-prompt">
+                    <p>¿Te interesa adoptar a {{ mascota.nombre }}? <a href="{% url 'login' %}">Inicia sesión</a> para solicitar la adopción.</p>
                 </div>
                 {% endif %}
             </div>

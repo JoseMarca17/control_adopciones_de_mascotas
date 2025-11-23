@@ -1,0 +1,65 @@
+{% extends 'base.html' %}
+
+{% block title %}Reportes de Adopción{% endblock %}
+
+{% block content %}
+<section class="reports">
+    <div class="container">
+        <h1>Reportes de Adopción</h1>
+        
+        <div class="reports-grid">
+            <div class="report-card">
+                <h3>Estadísticas Generales</h3>
+                <div class="report-stats">
+                    <div class="stat-item">
+                        <span class="stat-label">Total Mascotas:</span>
+                        <span class="stat-value">{{ total_mascotas }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Mascotas Disponibles:</span>
+                        <span class="stat-value">{{ mascotas_disponibles }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Total Adopciones:</span>
+                        <span class="stat-value">{{ total_adopciones }}</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-label">Solicitudes Pendientes:</span>
+                        <span class="stat-value">{{ solicitudes_pendientes }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="report-card">
+                <h3>Mascotas por Tipo</h3>
+                <div class="type-stats">
+                    <div class="type-item">
+                        <span class="type-label">Perros:</span>
+                        <span class="type-value">{{ perros }}</span>
+                    </div>
+                    <div class="type-item">
+                        <span class="type-label">Gatos:</span>
+                        <span class="type-value">{{ gatos }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="report-card">
+                <h3>Solicitudes por Estado</h3>
+                <div class="status-stats">
+                    {% for item in solicitudes_por_estado %}
+                    <div class="status-item">
+                        <span class="status-label">{{ item.estado|title }}:</span>
+                        <span class="status-value">{{ item.count }}</span>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="export-actions">
+            <a href="{% url 'adopciones:download_report_pdf' %}" class="btn btn-primary">📊 Descargar Reporte PDF</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

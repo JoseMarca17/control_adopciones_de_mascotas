@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Compromiso de Adopción</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            line-height: 1.6;
+        }
+        .header {
+            text-align: center;
+            border-bottom: 2px solid #333;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .content {
+            margin: 30px 0;
+        }
+        .signature {
+            margin-top: 50px;
+        }
+        .pet-info {
+            background: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>COMPROMISO DE ADOPCIÓN</h1>
+        <p>Asociación "Adopta un Amigo"</p>
+        <p>Fecha: {{ hoy }}</p>
+    </div>
+    
+    <div class="content">
+        <p>Yo, <strong>{{ solicitud_adopcion.adoptante.get_nombre_completo }}</strong>,</p>
+        <p>con identificación {{ solicitud_adopcion.adoptante.perfil_adoptante.numero_identificacion }},</p>
+        
+        <div class="pet-info">
+            <h3>Mascota Adoptada:</h3>
+            <p><strong>Nombre:</strong> {{ solicitud_adopcion.mascota.nombre }}</p>
+            <p><strong>Tipo:</strong> {{ solicitud_adopcion.mascota.get_tipo_mascota_display }}</p>
+            <p><strong>Raza:</strong> {{ solicitud_adopcion.mascota.raza }}</p>
+            <p><strong>Edad:</strong> {{ solicitud_adopcion.mascota.edad }} años</p>
+        </div>
+        
+        <h3>Me comprometo a:</h3>
+        <ul>
+            <li>Proporcionar un hogar amoroso y seguro</li>
+            <li>Brindar alimentación adecuada y agua fresca</li>
+            <li>Proporcionar atención veterinaria cuando sea necesario</li>
+            <li>Mantener las vacunas y desparasitaciones al día</li>
+            <li>Proporcionar ejercicio y enriquecimiento ambiental</li>
+            <li>Nunca abandonar a la mascota</li>
+            <li>Notificar a la asociación si no puedo seguir cuidando de la mascota</li>
+        </ul>
+        
+        <p>Fecha de adopción: {{ hoy }}</p>
+    </div>
+    
+    <div class="signature">
+        <p>_________________________</p>
+        <p>Firma del Adoptante</p>
+        <p>{{ solicitud_adopcion.adoptante.get_nombre_completo }}</p>
+    </div>
+    
+    <div class="signature">
+        <p>_________________________</p>
+        <p>Representante de la Asociación</p>
+        <p>Asociación "Adopta un Amigo"</p>
+    </div>
+</body>
+</html>
