@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Inicio - Adopción de Mascotas{% endblock %}
+
+{% block contenido %}
+<section class="hero">
+    <div class="contenedor">
+        <div class="contenido-hero">
+            <h1>Encuentra a tu compañero perfecto</h1>
+            <p>Miles de mascotas esperan un hogar lleno de amor. ¡Haz la diferencia hoy!</p>
+            <div class="botones-hero">
+                <a href="{% url 'catalogo' %}" class="boton boton-primario boton-grande">Ver Mascotas Disponibles</a>
+                {% if not user.is_authenticated %}
+                <a href="{% url 'iniciar_sesion' %}" class="boton boton-secundario boton-grande">Registrarse para Adoptar</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="caracteristicas">
+    <div class="contenedor">
+        <h2 class="titulo-seccion">¿Por qué adoptar?</h2>
+        <div class="grid-caracteristicas">
+            <div class="tarjeta-caracteristica">
+                <div class="icono-caracteristica">🐕</div>
+                <h3>Salvas una Vida</h3>
+                <p>Al adoptar, le das una segunda oportunidad a un animal que necesita un hogar.</p>
+            </div>
+            <div class="tarjeta-caracteristica">
+                <div class="icono-caracteristica">❤️</div>
+                <h3>Amor Incondicional</h3>
+                <p>Las mascotas adoptadas suelen ser muy agradecidas y leales con sus nuevos dueños.</p>
+            </div>
+            <div class="tarjeta-caracteristica">
+                <div class="icono-caracteristica">💰</div>
+                <h3>Más Económico</h3>
+                <p>La adopción es más económica que comprar y incluye vacunas y esterilización.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="estadisticas">
+    <div class="contenedor">
+        <h2>Nuestro Impacto</h2>
+        <div class="grid-estadisticas">
+            <div class="estadistica">
+                <h3>500+</h3>
+                <p>Mascotas Adoptadas</p>
+            </div>
+            <div class="estadistica">
+                <h3>200+</h3>
+                <p>Familias Felices</p>
+            </div>
+            <div class="estadistica">
+                <h3>99%</h3>
+                <p>Casos Exitosos</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="llamado-accion">
+    <div class="contenedor">
+        <div class="contenido-llamado">
+            <h2>¿Listo para cambiar una vida?</h2>
+            <p>Explora nuestro catálogo de mascotas y encuentra a tu nuevo mejor amigo.</p>
+            <a href="{% url 'catalogo' %}" class="boton boton-primario boton-grande">Ver Mascotas</a>
+        </div>
+    </div>
+</section>
+{% endblock %}

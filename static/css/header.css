@@ -1,0 +1,140 @@
+.encabezado-principal {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: blanco;
+    padding: 1rem 0;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+}
+
+.encabezado-principal .contenedor {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+
+.logo h1 {
+    margin: 0;
+    font-size: 1.8rem;
+}
+
+.logo a {
+    color: blanco;
+    text-decoration: none;
+}
+
+.navegacion-principal {
+    display: flex;
+    align-items: center;
+    gap: 2rem;
+}
+
+.menu {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    gap: 2rem;
+}
+
+.menu a {
+    color: blanco;
+    text-decoration: none;
+    font-weight: 500;
+    transition: opacity 0.3s ease;
+}
+
+.menu a:hover {
+    opacity: 0.8;
+}
+
+.menu-usuario {
+    position: relative;
+}
+
+.botones-autenticacion {
+    display: flex;
+    gap: 1rem;
+}
+
+.dropdown-usuario {
+    position: relative;
+    display: inline-block;
+}
+
+.boton-perfil {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: blanco;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+}
+
+.boton-perfil:hover {
+    background: rgba(255, 255, 255, 0.3);
+}
+
+.dropdown-contenido {
+    display: none;
+    position: absolute;
+    right: 0;
+    background: blanco;
+    min-width: 200px;
+    box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+    border-radius: 5px;
+    z-index: 1;
+    margin-top: 0.5rem;
+}
+
+.dropdown-contenido a {
+    color: #333;
+    padding: 0.75rem 1rem;
+    text-decoration: none;
+    display: block;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.3s ease;
+}
+
+.dropdown-contenido a:hover {
+    background-color: #f8f9fa;
+}
+
+.dropdown-contenido a:last-child {
+    border-bottom: none;
+}
+
+.dropdown-usuario:hover .dropdown-contenido {
+    display: block;
+}
+
+.oculto {
+    display: none !important;
+}
+
+.opcion-salir {
+    color: #e74c3c !important;
+    font-weight: 500;
+}
+
+@media (max-width: 768px) {
+    .encabezado-principal .contenedor {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .menu {
+        gap: 1rem;
+    }
+    
+    .botones-autenticacion {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+}

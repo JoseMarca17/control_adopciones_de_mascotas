@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block titulo %}Adopción de Mascotas{% endblock %}</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/principal.css' %}">
+    <link rel="stylesheet" href="{% static 'css/header.css' %}">
+    <link rel="stylesheet" href="{% static 'css/footer.css' %}">
+    <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+</head>
+<body>
+    {% include 'encabezado.html' %}
+    
+    <main class="contenido-principal">
+        {% block contenido %}
+        {% endblock %}
+    </main>
+    
+    {% include 'footer.html' %}
+    
+    <script src="{% static 'js/principal.js' %}"></script>
+</body>
+</html>

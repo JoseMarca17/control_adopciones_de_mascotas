@@ -1,0 +1,42 @@
+<header class="encabezado-principal">
+    <div class="contenedor">
+        <div class="logo">
+            <h1><a href="{% url 'inicio' %}">🐾 Adopta un Amigo</a></h1>
+        </div>
+        
+        <nav class="navegacion-principal">
+            <ul class="menu">
+                <li><a href="{% url 'inicio' %}">Inicio</a></li>
+                <li><a href="{% url 'catalogo' %}">Mascotas</a></li>
+            </ul>
+            
+            <div class="menu-usuario">
+                {% if user.is_authenticated %}
+                    <div class="dropdown-usuario">
+                        <button class="boton-perfil">
+                            👤 {{ user.first_name|default:user.username }}
+                        </button>
+                        <div class="dropdown-contenido">
+                            <a href="{% url 'panel_administracion' %}" class="{% if not user.is_staff and not user.groups.all.0.name == 'Administrador' %}oculto{% endif %}">
+                                🏠 Panel Admin
+                            </a>
+                            <a href="{% url 'agregar_mascota' %}" class="{% if not user.is_staff and not user.groups.all.0.name == 'Administrador' %}oculto{% endif %}">
+                                ➕ Agregar Mascota
+                            </a>
+                            <a href="{% url 'reportes' %}" class="{% if not user.is_staff and not user.groups.all.0.name == 'Administrador' %}oculto{% endif %}">
+                                📊 Reportes
+                            </a>
+                            <a href="#" class="opcion-perfil">👤 Mi Perfil</a>
+                            <a href="{% url 'cerrar_sesion' %}" class="opcion-salir">🚪 Cerrar Sesión</a>
+                        </div>
+                    </div>
+                {% else %}
+                    <div class="botones-autenticacion">
+                        <a href="{% url 'iniciar_sesion' %}" class="boton boton-secundario">Iniciar Sesión</a>
+                        <a href="{% url 'iniciar_sesion' %}" class="boton boton-primario">Registrarse</a>
+                    </div>
+                {% endif %}
+            </div>
+        </nav>
+    </div>
+</header>

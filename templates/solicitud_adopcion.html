@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block titulo %}Solicitud de Adopción - {{ mascota.nombre }}{% endblock %}
+
+{% block contenido %}
+<section class="solicitud-adopcion">
+    <div class="contenedor">
+        <div class="encabezado-solicitud">
+            <h1>Solicitud de Adopción</h1>
+            <p>Estás solicitando adoptar a <strong>{{ mascota.nombre }}</strong></p>
+            <div class="info-cola">
+                <span class="badge-cola">Posición en cola: #{{ cantidad_solicitudes|add:1 }}</span>
+            </div>
+        </div>
+
+        <div class="contenido-solicitud">
+            <div class="resumen-mascota">
+                <img src="{{ mascota.foto.url }}" alt="{{ mascota.nombre }}">
+                <h3>{{ mascota.nombre }}</h3>
+                <p>{{ mascota.raza }} • {{ mascota.edad }} años • {{ mascota.get_tamaño_display }}</p>
+            </div>
+
+            <div class="formulario-solicitud">
+                <form method="post">
+                    {% csrf_token %}
+                    <div class="grupo-formulario">
+                        <label for="{{ formulario.notas.id_for_label }}">¿Por qué quieres adoptar a {{ mascota.nombre }}?</label>
+                        {{ formulario.notas }}
+                        {% if formulario.notas.errors %}
+                        <div class="error">{{ formulario.notas.errors }}</div>
+                        {% endif %}
+                        <p class="texto-ayuda">Describe tu hogar, experiencia con mascotas y por qué serías un buen dueño.</p>
+                    </div>
+                    
+                    <div class="acciones-formulario">
+                        <button type="submit" class="boton boton-primario">Enviar Solicitud</button>
+                        <a href="{% url 'detalle_mascota' mascota.id %}" class="boton boton-secundario">Cancelar</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}

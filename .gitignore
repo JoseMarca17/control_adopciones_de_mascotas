@@ -1,0 +1,67 @@
+# Django
+*.pyc
+*~
+__pycache__
+db.sqlite3
+migrations/
+!migrations/__init__.py
+
+# Environment variables
+.env
+.env.local
+
+# Static files collected
+staticfiles/
+media/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Database (excepto si quieres incluir estructura)
+*.db
+
+# Python
+venv/
+env/
+ENV/
+.env/
+.venv/
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+.coverage
+*.cover
+.hypothesis/
+
+# PyInstaller
+*.manifest
+*.spec
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+.pytest_cache/
