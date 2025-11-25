@@ -16,4 +16,7 @@ urlpatterns = [
     path('admin/generar-compromiso/<uuid:solicitud_id>/', views.generate_commitment, name='generate_commitment'),
     path('admin/reportes/', views.reports, name='reports'),
     path('admin/descargar-reporte-pdf/', views.download_report_pdf, name='download_report_pdf'),
+    path('admin/mascotas/', views.listar_mascotas, name='listar_mascotas'),
+    path('admin/editar-mascota/<uuid:mascota_id>/', views.editar_mascota, name='editar_mascota'),
+    path('admin/eliminar-mascota/<uuid:mascota_id>/', views.eliminar_mascota, name='eliminar_mascota'),
 ]

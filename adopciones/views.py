@@ -144,7 +144,7 @@ def agregar_mascota(request):
             arbol_mascotas.insertar(mascota)
             
             messages.success(request, f'Mascota "{mascota.nombre}" agregada exitosamente.')
-            return redirect('dashboard')
+            return redirect('adopciones:dashboard')
     else:
         form = FormularioMascota()
     
@@ -282,3 +282,74 @@ def download_report_pdf(request):
     except Exception as e:
         messages.error(request, f'Error al generar el reporte: {e}')
         return redirect('reports')
+
+@login_required
+@administrador_requerido
+def editar_mascota(request, mascota_id):
+    """Editar mascota existente - Solo administradores"""
+    mascota = get_object_or_404(Mascota, id=mascota_id)
+    
+    # Verificar si la mascota puede ser editada
+    if not mascota.puede_ser_editada():
+        messages.error(request, 'No se puede editar esta mascota porque tiene solicitudes de adopción aceptadas o concretadas.')
+        return redirect('adopciones:listar_mascotas')
+    
+    if request.method == 'POST':
+        form = FormularioMascota(request.POST, request.FILES, instance=mascota)
+        if form.is_valid():
+            mascota_editada = form.save()
+            
+            # Actualizar en el árbol
+            from .utils import arbol_mascotas
+            # Primero eliminar la antigua
+            arbol_mascotas.eliminar(mascota)
+            # Luego insertar la editada
+            arbol_mascotas.insertar(mascota_editada)
+            
+            messages.success(request, f'Mascota "{mascota_editada.nombre}" actualizada exitosamente.')
+            return redirect('adopciones:listar_mascotas')
+    else:
+        form = FormularioMascota(instance=mascota)
+    
+    return render(request, 'editar_mascota.html', {
+        'form': form,
+        'mascota': mascota
+    })
+
+@login_required
+@administrador_requerido
+def eliminar_mascota(request, mascota_id):
+    """Eliminar mascota - Solo administradores"""
+    mascota = get_object_or_404(Mascota, id=mascota_id)
+    
+    # Verificar si la mascota puede ser eliminada
+    if not mascota.puede_ser_eliminada():
+        messages.error(request, 'No se puede eliminar esta mascota porque tiene solicitudes de adopción asociadas.')
+        return redirect('adopciones:listar_mascotas')
+    
+    if request.method == 'POST':
+        nombre_mascota = mascota.nombre
+        
+        # Eliminar del árbol
+        from .utils import arbol_mascotas
+        arbol_mascotas.eliminar(mascota)
+        
+        # Eliminar la mascota
+        mascota.delete()
+        
+        messages.success(request, f'Mascota "{nombre_mascota}" eliminada exitosamente.')
+        return redirect('adopciones:listar_mascotas')
+    
+    return render(request, 'eliminar_mascota.html', {
+        'mascota': mascota
+    })
+
+@login_required
+@administrador_requerido
+def listar_mascotas(request):
+    """Listar todas las mascotas para administración - Solo administradores"""
+    mascotas = Mascota.objects.all().order_by('-fecha_creacion')
+    
+    return render(request, 'listar_mascotas.html', {
+        'mascotas': mascotas
+    })

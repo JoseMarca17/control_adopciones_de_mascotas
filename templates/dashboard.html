@@ -59,8 +59,17 @@
                     <div class="action-link-arrow">→</div>
                 </a>
                 
-                <a href="{% url 'adopciones:procesar_solicitud' %}" class="action-link">
+                <a href="{% url 'adopciones:listar_mascotas' %}" class="action-link">
                     <div class="action-link-icon">📋</div>
+                    <div class="action-link-content">
+                        <h3>Gestionar Mascotas</h3>
+                        <p>Ver, editar y eliminar mascotas</p>
+                    </div>
+                    <div class="action-link-arrow">→</div>
+                </a>
+                
+                <a href="{% url 'adopciones:procesar_solicitud' %}" class="action-link">
+                    <div class="action-link-icon">⏳</div>
                     <div class="action-link-content">
                         <h3>Procesar Solicitudes</h3>
                         <p>Revisar y gestionar adopciones</p>

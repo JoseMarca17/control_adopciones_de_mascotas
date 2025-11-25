@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Eliminar {{ mascota.nombre }} - Administración{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <div class="container">
+        <div class="form-header">
+            <h1>🗑️ Eliminar Mascota</h1>
+            <p>¿Estás seguro de que quieres eliminar esta mascota?</p>
+        </div>
+
+        <div class="delete-confirmation">
+            <div class="pet-info-card">
+                {% if mascota.foto %}
+                <img src="{{ mascota.foto.url }}" alt="{{ mascota.nombre }}" class="pet-image-large">
+                {% endif %}
+                <div class="pet-details">
+                    <h3>{{ mascota.nombre }}</h3>
+                    <p><strong>Tipo:</strong> {{ mascota.get_tipo_mascota_display }}</p>
+                    <p><strong>Raza:</strong> {{ mascota.raza }}</p>
+                    <p><strong>Edad:</strong> {{ mascota.edad }} años</p>
+                    <p><strong>Fecha de ingreso:</strong> {{ mascota.fecha_ingreso }}</p>
+                </div>
+            </div>
+
+            <div class="warning-message">
+                <h4>⚠️ Advertencia</h4>
+                <p>Esta acción no se puede deshacer. La mascota será eliminada permanentemente del sistema.</p>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-danger">🗑️ Sí, Eliminar</button>
+                    <a href="{% url 'adopciones:listar_mascotas' %}" class="btn btn-secondary">❌ Cancelar</a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.delete-confirmation {
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.pet-info-card {
+    display: flex;
+    gap: 2rem;
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+.pet-image-large {
+    width: 150px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.pet-details h3 {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+}
+
+.warning-message {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    padding: 1.5rem;
+    border-radius: 10px;
+    margin-bottom: 2rem;
+}
+
+.warning-message h4 {
+    color: #856404;
+    margin-bottom: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .pet-info-card {
+        flex-direction: column;
+        text-align: center;
+    }
+}
+</style>
+{% endblock %}
+

@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gestión de Mascotas - Administración{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-main">
+    <div class="dashboard-container">
+        <div class="dashboard-header">
+            <h1 class="dashboard-title">🐕 Gestión de Mascotas</h1>
+            <p class="dashboard-subtitle">Administra todas las mascotas del sistema</p>
+        </div>
+
+        <div class="admin-actions" style="margin-bottom: 2rem;">
+            <a href="{% url 'adopciones:agregar_mascota' %}" class="btn btn-primary">
+                ➕ Agregar Nueva Mascota
+            </a>
+            <a href="{% url 'adopciones:dashboard' %}" class="btn btn-secondary">
+                ← Volver al Panel
+            </a>
+        </div>
+
+        <div class="pets-management">
+            {% if mascotas %}
+            <div class="pets-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Foto</th>
+                            <th>Nombre</th>
+                            <th>Tipo</th>
+                            <th>Raza</th>
+                            <th>Edad</th>
+                            <th>Estado</th>
+                            <th>Fecha Ingreso</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for mascota in mascotas %}
+                        <tr>
+                            <td>
+                                {% if mascota.foto %}
+                                <img src="{{ mascota.foto.url }}" alt="{{ mascota.nombre }}" class="pet-thumbnail">
+                                {% else %}
+                                <div class="no-image">📷</div>
+                                {% endif %}
+                            </td>
+                            <td>{{ mascota.nombre }}</td>
+                            <td>{{ mascota.get_tipo_mascota_display }}</td>
+                            <td>{{ mascota.raza }}</td>
+                            <td>{{ mascota.edad }} años</td>
+                            <td>
+                                <span class="status-badge {% if mascota.disponible %}available{% else %}adopted{% endif %}">
+                                    {{ mascota.disponible|yesno:"Disponible,Adoptada" }}
+                                </span>
+                            </td>
+                            <td>{{ mascota.fecha_ingreso }}</td>
+                            <td class="actions">
+                                <a href="{% url 'adopciones:editar_mascota' mascota.id %}" class="btn btn-sm btn-warning">
+                                    ✏️ Editar
+                                </a>
+                                {% if mascota.puede_ser_eliminada %}
+                                <a href="{% url 'adopciones:eliminar_mascota' mascota.id %}" class="btn btn-sm btn-danger">
+                                    🗑️ Eliminar
+                                </a>
+                                {% else %}
+                                <span class="btn btn-sm btn-disabled" title="No se puede eliminar porque tiene solicitudes">
+                                    ❌ Eliminar
+                                </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="no-data">
+                <h3>No hay mascotas registradas</h3>
+                <p>Comienza agregando tu primera mascota al sistema.</p>
+                <a href="{% url 'adopciones:agregar_mascota' %}" class="btn btn-primary">
+                    ➕ Agregar Primera Mascota
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.pets-management {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+}
+
+.pets-table {
+    overflow-x: auto;
+}
+
+.pets-table table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.pets-table th,
+.pets-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.pets-table th {
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.pet-thumbnail {
+    width: 50px;
+    height: 50px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.no-image {
+    width: 50px;
+    height: 50px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+}
+
+.status-badge {
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.status-badge.available {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-badge.adopted {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.btn-sm {
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+}
+
+.btn-warning {
+    background: #ffc107;
+    color: #212529;
+}
+
+.btn-warning:hover {
+    background: #e0a800;
+}
+
+.btn-disabled {
+    background: #6c757d;
+    color: white;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.no-data {
+    text-align: center;
+    padding: 3rem;
+    color: #6c757d;
+}
+
+@media (max-width: 768px) {
+    .pets-table {
+        font-size: 0.9rem;
+    }
+    
+    .actions {
+        flex-direction: column;
+    }
+}
+</style>
+{% endblock %}

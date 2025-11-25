@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}  <!-- Asegúrate de cargar static al inicio -->
 
 {% block title %}Mascotas Disponibles - Adopción de Mascotas{% endblock %}
 
@@ -33,7 +34,7 @@
                     {% if mascota.foto %}
                     <img src="{{ mascota.foto.url }}" alt="{{ mascota.nombre }}">
                     {% else %}
-                    <img src="/static/images/default-pet.jpg" alt="{{ mascota.nombre }}">
+                    <img src="{% static 'images/default-pet.jpg' %}" alt="{{ mascota.nombre }}">
                     {% endif %}
                     <div class="pet-type-badge">{{ mascota.get_tipo_mascota_display }}</div>
                 </div>
@@ -44,7 +45,6 @@
                     <p class="pet-size">{{ mascota.get_tamaño_display }}</p>
                     <p class="pet-description">{{ mascota.descripcion|truncatewords:20 }}</p>
                     <div class="pet-actions">
-                        <!-- CORREGIDO: usar nombres correctos de URLs -->
                         <a href="{% url 'adopciones:detalles_mascota' mascota.id %}" class="btn btn-secondary">Ver Detalles</a>
                         
                         {% if user.is_authenticated %}

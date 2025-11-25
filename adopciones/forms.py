@@ -21,7 +21,6 @@ class FormularioMascota(forms.ModelForm):
         }
 
 class FormularioSolicitudAdopcion(forms.ModelForm):
-    """Formulario para solicitud de adopción"""
     class Meta:
         model = SolicitudAdopcion
         fields = ['notas']

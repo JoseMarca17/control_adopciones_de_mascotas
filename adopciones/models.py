@@ -127,6 +127,35 @@ class ArbolMascotas:
         self._en_orden_recursivo(self.raiz, mascotas)
         return mascotas
     
+    def eliminar(self, mascota):
+        self.raiz = self._eliminar_recursivo(mascota, self.raiz)
+    
+    def _eliminar_recursivo(self, mascota, nodo_actual):
+        if nodo_actual is None:
+            return None
+            
+        if mascota.nombre.lower() < nodo_actual.mascota.nombre.lower():
+            nodo_actual.izquierda = self._eliminar_recursivo(mascota, nodo_actual.izquierda)
+        elif mascota.nombre.lower() > nodo_actual.mascota.nombre.lower():
+            nodo_actual.derecha = self._eliminar_recursivo(mascota, nodo_actual.derecha)
+        else:
+            if nodo_actual.izquierda is None:
+                return nodo_actual.derecha
+            elif nodo_actual.derecha is None:
+                return nodo_actual.izquierda
+            else:
+                sucesor = self._encontrar_minimo(nodo_actual.derecha)
+                nodo_actual.mascota = sucesor.mascota
+                nodo_actual.derecha = self._eliminar_recursivo(sucesor.mascota, nodo_actual.derecha)
+        
+        return nodo_actual
+    
+    def _encontrar_minimo(self, nodo):
+        actual = nodo
+        while actual.izquierda is not None:
+            actual = actual.izquierda
+        return actual
+    
     def _en_orden_recursivo(self, nodo, mascotas):
         if nodo is not None:
             self._en_orden_recursivo(nodo.izquierda, mascotas)
@@ -234,6 +263,16 @@ class Mascota(models.Model):
         verbose_name = 'mascota'
         verbose_name_plural = 'mascotas'
         ordering = ['-fecha_creacion']
+        
+    
+    def __str__(self):
+        return f"{self.nombre} - {self.get_tipo_mascota_display()}"
+    
+    def puede_ser_editada(self):
+        return not self.solicitudadopcion_set.filter(estado__in=['aceptado', 'concretado']).exists()
+    
+    def puede_ser_eliminada(self):
+        return not self.solicitudadopcion_set.exists()
     
     def __str__(self):
         return f"{self.nombre} - {self.get_tipo_mascota_display()}"
