@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.http import HttpResponse
 from django.template.loader import render_to_string
 import os
+from django.utils import timezone
 from .models import Mascota, PerfilAdoptante, SolicitudAdopcion, CompromisoAdopcion
 from .forms import FormularioMascota, FormularioSolicitudAdopcion, FormularioRegistroAdoptante
 from .utils import (
@@ -52,7 +53,7 @@ def solicitud_adopcion(request, mascota_id):
     
     if solicitud_existente:
         messages.warning(request, 'Ya tienes una solicitud pendiente o aceptada para esta mascota.')
-        return redirect('detalle_mascota', mascota_id=mascota_id)
+        return redirect('adopciones:detalles_mascota', mascota_id=mascota_id)  # ← CORREGIDO
     
     if request.method == 'POST':
         form = FormularioSolicitudAdopcion(request.POST)
@@ -64,7 +65,7 @@ def solicitud_adopcion(request, mascota_id):
             agregar_solicitud_cola(mascota.id, solicitud_adopcion)
             
             messages.success(request, f'¡Solicitud enviada para {mascota.nombre}! Estás en la posición #{obtener_cantidad_solicitudes(mascota_id)} de la lista de espera.')
-            return redirect('catalog')
+            return redirect('adopciones:catalog')  # ← CORREGIDO
     else:
         form = FormularioSolicitudAdopcion()
     
@@ -108,14 +109,46 @@ def dashboard(request):
     total_mascotas = Mascota.objects.count()
     mascotas_disponibles = Mascota.objects.filter(disponible=True).count()
     
+    # Calcular solicitudes pendientes
     solicitudes_pendientes = 0
     for mascota in Mascota.objects.filter(disponible=True):
         solicitudes_pendientes += obtener_cantidad_solicitudes(mascota.id)
+    
+    # ACTIVIDAD RECIENTE - Datos dinámicos
+    from datetime import datetime, timedelta
+    
+    # Solicitudes recientes (últimos 7 días)
+    fecha_limite = timezone.now() - timedelta(days=7)
+    solicitudes_recientes = SolicitudAdopcion.objects.filter(
+        fecha_solicitud__gte=fecha_limite
+    ).select_related('mascota', 'adoptante').order_by('-fecha_solicitud')[:5]
+    
+    # Mascotas agregadas recientemente
+    mascotas_recientes = Mascota.objects.filter(
+        fecha_creacion__gte=fecha_limite
+    ).order_by('-fecha_creacion')[:3]
+    
+    # Adopciones concretadas recientemente
+    adopciones_recientes = SolicitudAdopcion.objects.filter(
+        estado='concretado',
+        fecha_solicitud__gte=fecha_limite
+    ).select_related('mascota', 'adoptante').order_by('-fecha_solicitud')[:3]
+    
+    # Estadísticas rápidas
+    total_adopciones_mes = SolicitudAdopcion.objects.filter(
+        estado='concretado',
+        fecha_solicitud__gte=timezone.now().replace(day=1)  # Desde inicio del mes
+    ).count()
     
     context = {
         'total_mascotas': total_mascotas,
         'mascotas_disponibles': mascotas_disponibles,
         'solicitudes_pendientes': solicitudes_pendientes,
+        'solicitudes_recientes': solicitudes_recientes,
+        'mascotas_recientes': mascotas_recientes,
+        'adopciones_recientes': adopciones_recientes,
+        'total_adopciones_mes': total_adopciones_mes,
+        'fecha_limite': fecha_limite,
     }
     return render(request, 'dashboard.html', context)
 
@@ -160,22 +193,67 @@ def procesar_solicitud(request):
 @administrador_requerido
 def procesar_solicitud_mascota(request, mascota_id):
     mascota = get_object_or_404(Mascota, id=mascota_id)
-    solicitud_actual = ver_siguiente_solicitud(mascota_id)
     
-    if request.method == 'POST' and solicitud_actual:
+    if request.method == 'POST':
         accion = request.POST.get('accion')
-        solicitud_procesada = procesar_siguiente_solicitud(mascota_id)
         
-        if accion == 'aceptar':
-            solicitud_procesada.estado = 'aceptado'
-            solicitud_procesada.save()
-            messages.success(request, f'Solicitud de {solicitud_procesada.adoptante.get_nombre_completo()} aceptada.')
-        elif accion == 'rechazar':
-            solicitud_procesada.estado = 'rechazado'
-            solicitud_procesada.save()
-            messages.warning(request, f'Solicitud de {solicitud_procesada.adoptante.get_nombre_completo()} rechazada.')
+        if accion in ['aceptar', 'rechazar', 'concretar']:
+            # Obtener la solicitud actual SIN removerla de la cola
+            solicitud_actual = ver_siguiente_solicitud(mascota_id)
+            
+            if not solicitud_actual:
+                messages.error(request, 'No hay solicitudes para procesar.')
+                return redirect('adopciones:procesar_solicitud_mascota', mascota_id=mascota_id)
+            
+            if accion == 'aceptar':
+                solicitud_actual.estado = 'aceptado'
+                solicitud_actual.save()
+                messages.success(request, f'Solicitud de {solicitud_actual.adoptante.get_nombre_completo()} aceptada.')
+                
+            elif accion == 'rechazar':
+                solicitud_actual.estado = 'rechazado'
+                solicitud_actual.save()
+                # Solo remover de la cola si se rechaza
+                procesar_siguiente_solicitud(mascota_id)
+                messages.warning(request, f'Solicitud de {solicitud_actual.adoptante.get_nombre_completo()} rechazada.')
+                
+            elif accion == 'concretar':
+                if solicitud_actual.estado == 'aceptado':
+                    try:
+                        solicitud_actual.estado = 'concretado'
+                        solicitud_actual.save()
+                        
+                        mascota.disponible = False
+                        mascota.save()
+                        
+                        from .pdf_utils import generar_compromiso_adopcion
+                        from django.core.files.base import ContentFile
+                        
+                        pdf_content = generar_compromiso_adopcion(solicitud_actual)
+                        
+                        compromiso = CompromisoAdopcion.objects.create(
+                            solicitud_adopcion=solicitud_actual,
+                            fecha_compromiso=timezone.now()
+                        )
+                        
+                        nombre_archivo = f"compromiso_{solicitud_actual.id}.pdf"
+                        compromiso.documento_pdf.save(nombre_archivo, ContentFile(pdf_content))
+                        compromiso.save()
+                        
+                        # Remover de la cola solo cuando se concreta
+                        procesar_siguiente_solicitud(mascota_id)
+                        
+                        messages.success(request, f'✅ Adopción de {mascota.nombre} concretada. PDF generado.')
+                        
+                    except Exception as e:
+                        messages.error(request, f'❌ Error al concretar: {str(e)}')
+                else:
+                    messages.error(request, 'Solo se pueden concretar solicitudes aceptadas.')
         
-        return redirect('aplicacion:procesar_solicitud_mascota', mascota_id=mascota_id)
+        return redirect('adopciones:procesar_solicitud_mascota', mascota_id=mascota_id)
+    
+    # Para GET requests, mostrar la solicitud actual
+    solicitud_actual = ver_siguiente_solicitud(mascota_id)
     
     context = {
         'mascota': mascota,
@@ -217,12 +295,63 @@ def generate_commitment(request, solicitud_id):
 @login_required
 @administrador_requerido
 def reports(request):
+    from django.utils import timezone
+    from datetime import timedelta, datetime
+    
+    # Fechas para los reportes
+    hoy = timezone.now().date()
+    inicio_semana = hoy - timedelta(days=hoy.weekday())
+    inicio_mes = hoy.replace(day=1)
+    
+    # REPORTE DIARIO (hoy)
+    solicitudes_hoy = SolicitudAdopcion.objects.filter(
+        fecha_solicitud__date=hoy
+    ).count()
+    
+    adopciones_hoy = SolicitudAdopcion.objects.filter(
+        estado='concretado',
+        fecha_solicitud__date=hoy
+    ).count()
+    
+    mascotas_agregadas_hoy = Mascota.objects.filter(
+        fecha_creacion__date=hoy
+    ).count()
+    
+    # REPORTE SEMANAL (esta semana)
+    solicitudes_semana = SolicitudAdopcion.objects.filter(
+        fecha_solicitud__date__gte=inicio_semana
+    ).count()
+    
+    adopciones_semana = SolicitudAdopcion.objects.filter(
+        estado='concretado',
+        fecha_solicitud__date__gte=inicio_semana
+    ).count()
+    
+    mascotas_semana = Mascota.objects.filter(
+        fecha_creacion__date__gte=inicio_semana
+    ).count()
+    
+    # REPORTE MENSUAL (este mes)
+    solicitudes_mes = SolicitudAdopcion.objects.filter(
+        fecha_solicitud__date__gte=inicio_mes
+    ).count()
+    
+    adopciones_mes = SolicitudAdopcion.objects.filter(
+        estado='concretado',
+        fecha_solicitud__date__gte=inicio_mes
+    ).count()
+    
+    mascotas_mes = Mascota.objects.filter(
+        fecha_creacion__date__gte=inicio_mes
+    ).count()
+    
+    # Estadísticas generales (ya las tenías)
     total_adopciones = SolicitudAdopcion.objects.filter(estado='concretado').count()
     solicitudes_pendientes = SolicitudAdopcion.objects.filter(estado='espera').count()
-
     perros = Mascota.objects.filter(tipo_mascota='perro').count()
     gatos = Mascota.objects.filter(tipo_mascota='gato').count()
-
+    
+    # Solicitudes por estado
     solicitudes_por_estado = []
     for estado in ['espera', 'aceptado', 'rechazado', 'concretado']:
         count = SolicitudAdopcion.objects.filter(estado=estado).count()
@@ -237,16 +366,81 @@ def reports(request):
         'perros': perros,
         'gatos': gatos,
         'solicitudes_por_estado': solicitudes_por_estado,
+        
+        # Nuevos datos para reportes por período
+        'reporte_diario': {
+            'solicitudes': solicitudes_hoy,
+            'adopciones': adopciones_hoy,
+            'mascotas_agregadas': mascotas_agregadas_hoy,
+            'fecha': hoy.strftime('%d/%m/%Y')
+        },
+        'reporte_semanal': {
+            'solicitudes': solicitudes_semana,
+            'adopciones': adopciones_semana,
+            'mascotas_agregadas': mascotas_semana,
+            'periodo': f"{inicio_semana.strftime('%d/%m')} - {hoy.strftime('%d/%m/%Y')}"
+        },
+        'reporte_mensual': {
+            'solicitudes': solicitudes_mes,
+            'adopciones': adopciones_mes,
+            'mascotas_agregadas': mascotas_mes,
+            'periodo': hoy.strftime('%B %Y').capitalize()
+        }
     }
     return render(request, 'reporte.html', context)
 
 @login_required
 @administrador_requerido
 def download_report_pdf(request):
+    from django.utils import timezone
+    from datetime import timedelta
+    
+    # Obtener la fecha actual
+    hoy = timezone.now().date()
+    inicio_semana = hoy - timedelta(days=hoy.weekday())  # Lunes de esta semana
+    inicio_mes = hoy.replace(day=1)  # Primer día del mes actual
+    
+    # Consultas básicas
     total_adopciones = SolicitudAdopcion.objects.filter(estado='concretado').count()
     solicitudes_pendientes = SolicitudAdopcion.objects.filter(estado='espera').count()
     perros = Mascota.objects.filter(tipo_mascota='perro').count()
     gatos = Mascota.objects.filter(tipo_mascota='gato').count()
+    
+    # Reporte diario (hoy)
+    solicitudes_hoy = SolicitudAdopcion.objects.filter(
+        fecha_solicitud__date=hoy
+    ).count()
+    adopciones_hoy = SolicitudAdopcion.objects.filter(
+        estado='concretado',
+        fecha_solicitud__date=hoy
+    ).count()
+    mascotas_agregadas_hoy = Mascota.objects.filter(
+        fecha_ingreso__date=hoy
+    ).count()
+    
+    # Reporte semanal (esta semana)
+    solicitudes_semana = SolicitudAdopcion.objects.filter(
+        fecha_solicitud__date__gte=inicio_semana
+    ).count()
+    adopciones_semana = SolicitudAdopcion.objects.filter(
+        estado='concretado',
+        fecha_solicitud__date__gte=inicio_semana
+    ).count()
+    mascotas_semana = Mascota.objects.filter(
+        fecha_ingreso__date__gte=inicio_semana
+    ).count()
+    
+    # Reporte mensual (este mes)
+    solicitudes_mes = SolicitudAdopcion.objects.filter(
+        fecha_solicitud__date__gte=inicio_mes
+    ).count()
+    adopciones_mes = SolicitudAdopcion.objects.filter(
+        estado='concretado',
+        fecha_solicitud__date__gte=inicio_mes
+    ).count()
+    mascotas_mes = Mascota.objects.filter(
+        fecha_ingreso__date__gte=inicio_mes
+    ).count()
     
     datos_reporte = {
         'total_mascotas': Mascota.objects.count(),
@@ -255,9 +449,28 @@ def download_report_pdf(request):
         'solicitudes_pendientes': solicitudes_pendientes,
         'perros': perros,
         'gatos': gatos,
+        
+        # Agregar los nuevos reportes
+        'reporte_diario': {
+            'solicitudes': solicitudes_hoy,
+            'adopciones': adopciones_hoy,
+            'mascotas_agregadas': mascotas_agregadas_hoy,
+        },
+        'reporte_semanal': {
+            'solicitudes': solicitudes_semana,
+            'adopciones': adopciones_semana,
+            'mascotas_agregadas': mascotas_semana,
+        },
+        'reporte_mensual': {
+            'solicitudes': solicitudes_mes,
+            'adopciones': adopciones_mes,
+            'mascotas_agregadas': mascotas_mes,
+        }
     }
     
     try:
+        # Usar TU función de PDF
+        from .pdf_utils import generar_reporte_adopciones
         pdf_content = generar_reporte_adopciones(datos_reporte)
         
         respuesta = HttpResponse(pdf_content, content_type='application/pdf')
@@ -268,7 +481,7 @@ def download_report_pdf(request):
         
     except Exception as e:
         messages.error(request, f'Error al generar el reporte: {e}')
-        return redirect('reports')
+        return redirect('adopciones:reports')
 
 @login_required
 @administrador_requerido
@@ -372,3 +585,67 @@ def registrar_usuario(request):
         form = FormularioRegistroUsuario()
     
     return render(request, 'registrar_usuario.html', {'form': form})
+
+@login_required
+def mis_solicitudes(request):
+    solicitudes = SolicitudAdopcion.objects.filter(adoptante=request.user).order_by('-fecha_solicitud')
+    
+    context = {
+        'solicitudes': solicitudes,
+    }
+    return render(request, 'mis_solicitudes.html', context)
+
+@login_required
+@administrador_requerido
+def concretar_adopciones_aceptadas(request):
+    """Vista especial para concretar adopciones ya aceptadas"""
+    # Buscar solicitudes aceptadas donde la mascota aún esté disponible
+    solicitudes_aceptadas = SolicitudAdopcion.objects.filter(
+        estado='aceptado',
+        mascota__disponible=True
+    ).select_related('mascota', 'adoptante').order_by('fecha_solicitud')
+    
+    if request.method == 'POST':
+        solicitud_id = request.POST.get('solicitud_id')
+        solicitud = get_object_or_404(SolicitudAdopcion, id=solicitud_id)
+        
+        if solicitud.estado == 'aceptado':
+            try:
+                # 1. Cambiar estado a concretado
+                solicitud.estado = 'concretado'
+                solicitud.save()
+                
+                # 2. Marcar mascota como no disponible
+                mascota = solicitud.mascota
+                mascota.disponible = False
+                mascota.save()
+                
+                # 3. Generar PDF del compromiso
+                from .pdf_utils import generar_compromiso_adopcion
+                from django.core.files.base import ContentFile
+                
+                pdf_content = generar_compromiso_adopcion(solicitud)
+                
+                # 4. Crear y guardar el compromiso
+                compromiso = CompromisoAdopcion.objects.create(
+                    solicitud_adopcion=solicitud,
+                    fecha_compromiso=timezone.now()
+                )
+                
+                nombre_archivo = f"compromiso_{solicitud.id}.pdf"
+                compromiso.documento_pdf.save(nombre_archivo, ContentFile(pdf_content))
+                compromiso.save()
+                
+                messages.success(request, f'✅ Adopción de {mascota.nombre} concretada exitosamente. PDF generado.')
+                
+            except Exception as e:
+                messages.error(request, f'❌ Error al concretar adopción: {str(e)}')
+        else:
+            messages.error(request, 'Esta solicitud no está en estado aceptado.')
+        
+        return redirect('adopciones:concretar_adopciones_aceptadas')
+    
+    context = {
+        'solicitudes_aceptadas': solicitudes_aceptadas,
+    }
+    return render(request, 'concretar_adopciones_aceptadas.html', context)

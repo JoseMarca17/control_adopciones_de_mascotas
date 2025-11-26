@@ -1,0 +1,304 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Concretar Adopciones Aceptadas{% endblock %}
+
+{% block content %}
+<section class="concretar-adopciones">
+    <div class="container">
+        <div class="header">
+            <h1>Concretar Adopciones Aceptadas</h1>
+            <p>Completa el proceso de adopción para solicitudes previamente aceptadas</p>
+        </div>
+
+        {% if solicitudes_aceptadas %}
+        <div class="solicitudes-grid">
+            {% for solicitud in solicitudes_aceptadas %}
+            <div class="solicitud-card">
+                <div class="solicitud-header">
+                    <div class="mascota-image">
+                        {% if solicitud.mascota.foto %}
+                        <img src="{{ solicitud.mascota.foto.url }}" alt="{{ solicitud.mascota.nombre }}">
+                        {% else %}
+                        <img src="{% static 'images/default-pet.jpg' %}" alt="{{ solicitud.mascota.nombre }}">
+                        {% endif %}
+                    </div>
+                    <div class="mascota-info">
+                        <h3>{{ solicitud.mascota.nombre }}</h3>
+                        <p class="mascota-details">
+                            {{ solicitud.mascota.raza }} • 
+                            {{ solicitud.mascota.edad }} año{{ solicitud.mascota.edad|pluralize }} • 
+                            {{ solicitud.mascota.get_tamaño_display }}
+                        </p>
+                        <div class="status-badge accepted">✅ Aceptada</div>
+                    </div>
+                </div>
+                
+                <div class="adoptante-info">
+                    <h4>👤 {{ solicitud.adoptante.get_nombre_completo }}</h4>
+                    <div class="contact-info">
+                        <p>📧 {{ solicitud.adoptante.email }}</p>
+                        <p>📞 {{ solicitud.adoptante.telefono|default:"No proporcionado" }}</p>
+                        <p>📍 {{ solicitud.adoptante.direccion|truncatewords:5 }}</p>
+                    </div>
+                    
+                    {% if solicitud.adoptante.perfil_adoptante %}
+                    <div class="profile-info">
+                        <p><strong>Ocupación:</strong> {{ solicitud.adoptante.perfil_adoptante.ocupacion }}</p>
+                        <p><strong>Experiencia:</strong> {{ solicitud.adoptante.perfil_adoptante.experiencia_mascotas }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="solicitud-actions">
+                    <form method="post" class="concretar-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="solicitud_id" value="{{ solicitud.id }}">
+                        <button type="submit" class="btn btn-primary btn-concretar" 
+                                onclick="return confirm('¿Estás seguro de concretar la adopción de {{ solicitud.mascota.nombre }} por {{ solicitud.adoptante.get_nombre_completo }}? Esta acción no se puede deshacer.')">
+                            🏠 Concretar Adopción
+                        </button>
+                    </form>
+                    <p class="help-text">La mascota será marcada como adoptada y se generará el PDF del compromiso.</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-solicitudes">
+            <div class="no-solicitudes-icon">📭</div>
+            <h3>No hay adopciones pendientes de concretar</h3>
+            <p>Todas las solicitudes aceptadas han sido procesadas o no hay solicitudes en estado aceptado.</p>
+            <div class="action-links">
+                <a href="{% url 'adopciones:procesar_solicitud' %}" class="btn btn-secondary">Ir a Procesar Solicitudes</a>
+                <a href="{% url 'adopciones:dashboard' %}" class="btn btn-outline">Volver al Dashboard</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<style>
+.concretar-adopciones .header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.concretar-adopciones .header h1 {
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.concretar-adopciones .header p {
+    color: #7f8c8d;
+    font-size: 1.1rem;
+}
+
+.solicitudes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+}
+
+.solicitud-card {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    border-left: 4px solid #27ae60;
+    transition: transform 0.3s ease;
+}
+
+.solicitud-card:hover {
+    transform: translateY(-5px);
+}
+
+.solicitud-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.mascota-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 10px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.mascota-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.mascota-info h3 {
+    margin: 0 0 0.5rem 0;
+    color: #2c3e50;
+    font-size: 1.4rem;
+}
+
+.mascota-details {
+    color: #7f8c8d;
+    margin: 0.3rem 0;
+}
+
+.status-badge {
+    display: inline-block;
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.status-badge.accepted {
+    background: #d4edda;
+    color: #155724;
+}
+
+.adoptante-info {
+    margin-bottom: 1.5rem;
+}
+
+.adoptante-info h4 {
+    margin: 0 0 1rem 0;
+    color: #34495e;
+    font-size: 1.1rem;
+}
+
+.contact-info p {
+    margin: 0.3rem 0;
+    color: #555;
+    font-size: 0.9rem;
+}
+
+.profile-info {
+    margin-top: 1rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.profile-info p {
+    margin: 0.3rem 0;
+    font-size: 0.9rem;
+}
+
+.solicitud-actions {
+    text-align: center;
+    border-top: 1px solid #eee;
+    padding-top: 1.5rem;
+}
+
+.btn-concretar {
+    background: linear-gradient(135deg, #27ae60, #219a52);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 8px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    width: 100%;
+    margin-bottom: 1rem;
+}
+
+.btn-concretar:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(39, 174, 96, 0.4);
+}
+
+.help-text {
+    font-size: 0.8rem;
+    color: #7f8c8d;
+    margin: 0;
+}
+
+.no-solicitudes {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.no-solicitudes-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.no-solicitudes h3 {
+    color: #7f8c8d;
+    margin-bottom: 1rem;
+}
+
+.no-solicitudes p {
+    color: #7f8c8d;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+.action-links {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 0.7rem 1.5rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+    display: inline-block;
+}
+
+.btn-secondary {
+    background: #95a5a6;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #7f8c8d;
+}
+
+.btn-outline {
+    background: transparent;
+    color: #3498db;
+    border: 2px solid #3498db;
+}
+
+.btn-outline:hover {
+    background: #3498db;
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .solicitudes-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .solicitud-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .action-links {
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}

@@ -1,65 +1,441 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Reportes de Adopción{% endblock %}
+{% block title %}Reportes - Sistema de Adopciones{% endblock %}
 
 {% block content %}
 <section class="reports">
     <div class="container">
-        <h1>Reportes de Adopción</h1>
-        
-        <div class="reports-grid">
-            <div class="report-card">
-                <h3>Estadísticas Generales</h3>
-                <div class="report-stats">
-                    <div class="stat-item">
-                        <span class="stat-label">Total Mascotas:</span>
-                        <span class="stat-value">{{ total_mascotas }}</span>
+        <div class="reports-header">
+            <h1>📊 Reportes del Sistema</h1>
+            <p>Estadísticas y métricas de adopciones</p>
+        </div>
+
+        <!-- Reportes por Período -->
+        <div class="reports-period-grid">
+            <!-- Reporte Diario -->
+            <div class="report-period-card">
+                <div class="report-period-header">
+                    <h3>📅 Hoy</h3>
+                    <span class="report-period-date">{{ reporte_diario.fecha }}</span>
+                </div>
+                <div class="report-period-stats">
+                    <div class="report-period-stat">
+                        <span class="stat-number">{{ reporte_diario.solicitudes }}</span>
+                        <span class="stat-label">Solicitudes</span>
                     </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Mascotas Disponibles:</span>
-                        <span class="stat-value">{{ mascotas_disponibles }}</span>
+                    <div class="report-period-stat">
+                        <span class="stat-number">{{ reporte_diario.adopciones }}</span>
+                        <span class="stat-label">Adopciones</span>
                     </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Total Adopciones:</span>
-                        <span class="stat-value">{{ total_adopciones }}</span>
-                    </div>
-                    <div class="stat-item">
-                        <span class="stat-label">Solicitudes Pendientes:</span>
-                        <span class="stat-value">{{ solicitudes_pendientes }}</span>
+                    <div class="report-period-stat">
+                        <span class="stat-number">{{ reporte_diario.mascotas_agregadas }}</span>
+                        <span class="stat-label">Mascotas Nuevas</span>
                     </div>
                 </div>
             </div>
-            
-            <div class="report-card">
-                <h3>Mascotas por Tipo</h3>
-                <div class="type-stats">
-                    <div class="type-item">
-                        <span class="type-label">Perros:</span>
-                        <span class="type-value">{{ perros }}</span>
+
+            <!-- Reporte Semanal -->
+            <div class="report-period-card">
+                <div class="report-period-header">
+                    <h3>📈 Esta Semana</h3>
+                    <span class="report-period-date">{{ reporte_semanal.periodo }}</span>
+                </div>
+                <div class="report-period-stats">
+                    <div class="report-period-stat">
+                        <span class="stat-number">{{ reporte_semanal.solicitudes }}</span>
+                        <span class="stat-label">Solicitudes</span>
                     </div>
-                    <div class="type-item">
-                        <span class="type-label">Gatos:</span>
-                        <span class="type-value">{{ gatos }}</span>
+                    <div class="report-period-stat">
+                        <span class="stat-number">{{ reporte_semanal.adopciones }}</span>
+                        <span class="stat-label">Adopciones</span>
+                    </div>
+                    <div class="report-period-stat">
+                        <span class="stat-number">{{ reporte_semanal.mascotas_agregadas }}</span>
+                        <span class="stat-label">Mascotas Nuevas</span>
                     </div>
                 </div>
             </div>
-            
-            <div class="report-card">
-                <h3>Solicitudes por Estado</h3>
-                <div class="status-stats">
-                    {% for item in solicitudes_por_estado %}
-                    <div class="status-item">
-                        <span class="status-label">{{ item.estado|title }}:</span>
-                        <span class="status-value">{{ item.count }}</span>
+
+            <!-- Reporte Mensual -->
+            <div class="report-period-card">
+                <div class="report-period-header">
+                    <h3>📊 Este Mes</h3>
+                    <span class="report-period-date">{{ reporte_mensual.periodo }}</span>
+                </div>
+                <div class="report-period-stats">
+                    <div class="report-period-stat">
+                        <span class="stat-number">{{ reporte_mensual.solicitudes }}</span>
+                        <span class="stat-label">Solicitudes</span>
                     </div>
-                    {% endfor %}
+                    <div class="report-period-stat">
+                        <span class="stat-number">{{ reporte_mensual.adopciones }}</span>
+                        <span class="stat-label">Adopciones</span>
+                    </div>
+                    <div class="report-period-stat">
+                        <span class="stat-number">{{ reporte_mensual.mascotas_agregadas }}</span>
+                        <span class="stat-label">Mascotas Nuevas</span>
+                    </div>
                 </div>
             </div>
         </div>
-        
+
+        <!-- Tablas Detalladas -->
+        <div class="reports-tables-grid">
+            <!-- Tabla de Estadísticas Generales -->
+            <div class="report-table-card">
+                <h3>📋 Estadísticas Generales</h3>
+                <table class="report-table">
+                    <tbody>
+                        <tr>
+                            <td>Total de Adopciones</td>
+                            <td class="stat-value">{{ total_adopciones }}</td>
+                        </tr>
+                        <tr>
+                            <td>Solicitudes Pendientes</td>
+                            <td class="stat-value">{{ solicitudes_pendientes }}</td>
+                        </tr>
+                        <tr>
+                            <td>Perros en Sistema</td>
+                            <td class="stat-value">{{ perros }}</td>
+                        </tr>
+                        <tr>
+                            <td>Gatos en Sistema</td>
+                            <td class="stat-value">{{ gatos }}</td>
+                        </tr>
+                        <tr>
+                            <td>Total Mascotas</td>
+                            <td class="stat-value">{{ perros|add:gatos }}</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Tabla de Estados de Solicitudes -->
+            <div class="report-table-card">
+                <h3>🔄 Estados de Solicitudes</h3>
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>Estado</th>
+                            <th>Cantidad</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in solicitudes_por_estado %}
+                        <tr>
+                            <td>
+                                {% if item.estado == 'espera' %}⏳ En Espera
+                                {% elif item.estado == 'aceptado' %}✅ Aceptado
+                                {% elif item.estado == 'rechazado' %}❌ Rechazado
+                                {% elif item.estado == 'concretado' %}🏠 Concretado
+                                {% else %}{{ item.estado }}{% endif %}
+                            </td>
+                            <td class="stat-value">{{ item.count }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Resumen Comparativo -->
+        <div class="report-summary-card">
+            <h3>📈 Resumen Comparativo</h3>
+            <table class="comparison-table">
+                <thead>
+                    <tr>
+                        <th>Período</th>
+                        <th>Solicitudes</th>
+                        <th>Adopciones</th>
+                        <th>Mascotas Nuevas</th>
+                        <th>Tasa de Éxito</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>Hoy</td>
+                        <td>{{ reporte_diario.solicitudes }}</td>
+                        <td>{{ reporte_diario.adopciones }}</td>
+                        <td>{{ reporte_diario.mascotas_agregadas }}</td>
+                        <td>
+                            {% if reporte_diario.solicitudes > 0 %}
+                                {{ reporte_diario.adopciones|floatformat:0 }}%
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Esta Semana</td>
+                        <td>{{ reporte_semanal.solicitudes }}</td>
+                        <td>{{ reporte_semanal.adopciones }}</td>
+                        <td>{{ reporte_semanal.mascotas_agregadas }}</td>
+                        <td>
+                            {% if reporte_semanal.solicitudes > 0 %}
+                                {{ reporte_semanal.adopciones|floatformat:0 }}%
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Este Mes</td>
+                        <td>{{ reporte_mensual.solicitudes }}</td>
+                        <td>{{ reporte_mensual.adopciones }}</td>
+                        <td>{{ reporte_mensual.mascotas_agregadas }}</td>
+                        <td>
+                            {% if reporte_mensual.solicitudes > 0 %}
+                                {{ reporte_mensual.adopciones|floatformat:0 }}%
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Botones de Exportación -->
         <div class="export-actions">
-            <a href="{% url 'adopciones:download_report_pdf' %}" class="btn btn-primary">📊 Descargar Reporte PDF</a>
+            <a href="{% url 'adopciones:download_report_pdf' %}" class="btn btn-primary">
+                📄 Exportar Reporte PDF
+            </a>
+            <button onclick="window.print()" class="btn btn-secondary">
+                🖨️ Imprimir Reporte
+            </button>
         </div>
     </div>
 </section>
+
+<style>
+/* Estilos para Reportes */
+.reports {
+    padding: 2rem 0;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    min-height: 100vh;
+}
+
+.reports-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.reports-header h1 {
+    color: #2c3e50;
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.reports-header p {
+    color: #6c757d;
+    font-size: 1.1rem;
+}
+
+/* Grid de Reportes por Período */
+.reports-period-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 3rem;
+}
+
+.report-period-card {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    border: 1px solid #e9ecef;
+    transition: transform 0.3s ease;
+}
+
+.report-period-card:hover {
+    transform: translateY(-5px);
+}
+
+.report-period-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #f8f9fa;
+}
+
+.report-period-header h3 {
+    margin: 0;
+    color: #2c3e50;
+    font-size: 1.3rem;
+}
+
+.report-period-date {
+    color: #6c757d;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.report-period-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+}
+
+.report-period-stat {
+    text-align: center;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.report-period-stat .stat-number {
+    display: block;
+    font-size: 2rem;
+    font-weight: bold;
+    color: #3498db;
+    margin-bottom: 0.3rem;
+}
+
+.report-period-stat .stat-label {
+    font-size: 0.8rem;
+    color: #6c757d;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+/* Grid de Tablas */
+.reports-tables-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 2rem;
+    margin-bottom: 3rem;
+}
+
+.report-table-card {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    border: 1px solid #e9ecef;
+}
+
+.report-table-card h3 {
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    font-size: 1.3rem;
+    border-bottom: 2px solid #f8f9fa;
+    padding-bottom: 0.5rem;
+}
+
+.report-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.report-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #e9ecef;
+    color: #495057;
+}
+
+.report-table th {
+    padding: 1rem;
+    border-bottom: 2px solid #3498db;
+    color: #2c3e50;
+    font-weight: 600;
+    text-align: left;
+}
+
+.report-table tr:last-child td {
+    border-bottom: none;
+}
+
+.report-table .stat-value {
+    font-weight: bold;
+    color: #3498db;
+    text-align: right;
+}
+
+/* Tabla Comparativa */
+.report-summary-card {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    border: 1px solid #e9ecef;
+    margin-bottom: 3rem;
+}
+
+.report-summary-card h3 {
+    color: #2c3e50;
+    margin-bottom: 1.5rem;
+    font-size: 1.3rem;
+    border-bottom: 2px solid #f8f9fa;
+    padding-bottom: 0.5rem;
+}
+
+.comparison-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.comparison-table th,
+.comparison-table td {
+    padding: 1rem;
+    text-align: center;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.comparison-table th {
+    background: #f8f9fa;
+    color: #2c3e50;
+    font-weight: 600;
+    border-bottom: 2px solid #3498db;
+}
+
+.comparison-table tr:hover {
+    background: #f8f9fa;
+}
+
+/* Botones de Exportación */
+.export-actions {
+    text-align: center;
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .reports-period-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .reports-tables-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .report-period-stats {
+        grid-template-columns: 1fr;
+        gap: 0.5rem;
+    }
+    
+    .comparison-table {
+        font-size: 0.9rem;
+    }
+    
+    .comparison-table th,
+    .comparison-table td {
+        padding: 0.5rem;
+    }
+    
+    .export-actions {
+        flex-direction: column;
+    }
+    
+    .export-actions .btn {
+        width: 100%;
+    }
+}
+</style>
 {% endblock %}

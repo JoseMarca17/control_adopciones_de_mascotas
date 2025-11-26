@@ -20,4 +20,6 @@ urlpatterns = [
     path('admin/editar-mascota/<uuid:mascota_id>/', views.editar_mascota, name='editar_mascota'),
     path('admin/eliminar-mascota/<uuid:mascota_id>/', views.eliminar_mascota, name='eliminar_mascota'),
     path('registrar/', views.registrar_usuario, name='registrar_usuario'),
+    path('mis-solicitudes/', views.mis_solicitudes, name='mis_solicitudes'),
+    path('concretar-adopciones/', views.concretar_adopciones_aceptadas, name='concretar_adopciones_aceptadas'),
 ]

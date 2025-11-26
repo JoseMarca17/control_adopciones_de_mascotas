@@ -6,6 +6,7 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Table, Tabl
 from reportlab.lib.units import inch
 from reportlab.lib import colors
 from datetime import date
+from django.utils import timezone
 from django.http import HttpResponse
 
 def generar_compromiso_adopcion(solicitud_adopcion):

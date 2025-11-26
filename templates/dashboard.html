@@ -89,17 +89,108 @@
         </div>
 
         <!-- Actividad Reciente -->
-        <div class="dashboard-activity">
-            <div class="activity-title-section">
-                <h2 class="activity-title">📈 Actividad Reciente</h2>
-                <span class="activity-badge">Próximamente</span>
-            </div>
-            <div class="activity-placeholder">
-                <div class="placeholder-icon">📊</div>
-                <p class="placeholder-text">Aquí podrás ver la actividad reciente del sistema</p>
-                <small class="placeholder-small">Las métricas detalladas estarán disponibles pronto</small>
-            </div>
+       <!-- Actividad Reciente -->
+<!-- Actividad Reciente -->
+<div class="dashboard-activity">
+    <div class="dashboard-activity-header">
+        <h2 class="dashboard-activity-title">📈 Actividad Reciente</h2>
+        <span class="dashboard-activity-badge">Últimos 7 días</span>
+    </div>
+    
+    <div class="dashboard-activity-stats">
+        <div class="dashboard-activity-stat dashboard-activity-stat-1">
+            <span class="dashboard-activity-stat-number">{{ solicitudes_recientes.count }}</span>
+            <span class="dashboard-activity-stat-label">Nuevas Solicitudes</span>
         </div>
+        <div class="dashboard-activity-stat dashboard-activity-stat-2">
+            <span class="dashboard-activity-stat-number">{{ mascotas_recientes.count }}</span>
+            <span class="dashboard-activity-stat-label">Mascotas Nuevas</span>
+        </div>
+        <div class="dashboard-activity-stat dashboard-activity-stat-3">
+            <span class="dashboard-activity-stat-number">{{ adopciones_recientes.count }}</span>
+            <span class="dashboard-activity-stat-label">Adopciones</span>
+        </div>
+    </div>
+
+    <!-- Solicitudes Recientes -->
+    {% if solicitudes_recientes %}
+    <div class="dashboard-activity-section">
+        <h3 class="dashboard-activity-subtitle">📋 Solicitudes Recientes</h3>
+        <div class="dashboard-activity-list">
+            {% for solicitud in solicitudes_recientes %}
+            <div class="dashboard-activity-item">
+                <div class="dashboard-activity-item-icon">
+                    {% if solicitud.mascota.tipo_mascota == 'perro' %}🐕{% else %}🐈{% endif %}
+                </div>
+                <div class="dashboard-activity-item-content">
+                    <h4>{{ solicitud.adoptante.get_nombre_completo }}</h4>
+                    <p>Solicitó adoptar a <strong>{{ solicitud.mascota.nombre }}</strong></p>
+                    <span class="dashboard-activity-item-time">{{ solicitud.fecha_solicitud|timesince }} ago</span>
+                </div>
+                <div class="dashboard-activity-item-status {{ solicitud.estado }}">
+                    {% if solicitud.estado == 'espera' %}⏳
+                    {% elif solicitud.estado == 'aceptado' %}✅
+                    {% elif solicitud.estado == 'concretado' %}🏠
+                    {% else %}❌{% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Mascotas Recientes -->
+    {% if mascotas_recientes %}
+    <div class="dashboard-activity-section">
+        <h3 class="dashboard-activity-subtitle">🐾 Mascotas Nuevas</h3>
+        <div class="dashboard-activity-list">
+            {% for mascota in mascotas_recientes %}
+            <div class="dashboard-activity-item">
+                <div class="dashboard-activity-item-icon">
+                    {% if mascota.tipo_mascota == 'perro' %}🐕{% else %}🐈{% endif %}
+                </div>
+                <div class="dashboard-activity-item-content">
+                    <h4>{{ mascota.nombre }}</h4>
+                    <p>{{ mascota.raza }} • {{ mascota.edad }} año{{ mascota.edad|pluralize }}</p>
+                    <span class="dashboard-activity-item-time">Agregada {{ mascota.fecha_creacion|timesince }} ago</span>
+                </div>
+                <div class="dashboard-activity-item-status {% if mascota.disponible %}available{% else %}adopted{% endif %}">
+                    {% if mascota.disponible %}🏠{% else %}✅{% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Adopciones Recientes -->
+    {% if adopciones_recientes %}
+    <div class="dashboard-activity-section">
+        <h3 class="dashboard-activity-subtitle">🎉 Adopciones Concretadas</h3>
+        <div class="dashboard-activity-list">
+            {% for adopcion in adopciones_recientes %}
+            <div class="dashboard-activity-item">
+                <div class="dashboard-activity-item-icon">🏠</div>
+                <div class="dashboard-activity-item-content">
+                    <h4>{{ adopcion.adoptante.get_nombre_completo }}</h4>
+                    <p>Adoptó a <strong>{{ adopcion.mascota.nombre }}</strong></p>
+                    <span class="dashboard-activity-item-time">{{ adopcion.fecha_solicitud|timesince }} ago</span>
+                </div>
+                <div class="dashboard-activity-item-status completed">✅</div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    {% if not solicitudes_recientes and not mascotas_recientes and not adopciones_recientes %}
+    <div class="dashboard-activity-placeholder">
+        <div class="dashboard-activity-placeholder-icon">📊</div>
+        <p class="dashboard-activity-placeholder-text">No hay actividad reciente en los últimos 7 días</p>
+        <small class="dashboard-activity-placeholder-small">La actividad aparecerá aquí cuando haya movimientos en el sistema</small>
+    </div>
+    {% endif %}
+</div>
     </div>
 </div>
 {% endblock %}

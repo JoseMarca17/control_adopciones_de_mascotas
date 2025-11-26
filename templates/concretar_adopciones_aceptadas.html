@@ -1,0 +1,193 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Concretar Adopciones Aceptadas{% endblock %}
+
+{% block content %}
+<section class="process-pet-requests">
+    <div class="container">
+        <div class="process-header">
+            <h1>Concretar Adopciones Aceptadas</h1>
+            <p>Completa el proceso de adopción para solicitudes previamente aceptadas</p>
+        </div>
+
+        {% if solicitudes_aceptadas %}
+        <div class="requests-list">
+            {% for solicitud in solicitudes_aceptadas %}
+            <div class="request-card accepted-request">
+                <div class="applicant-info">
+                    <div class="request-pet-header">
+                        <div class="pet-image-small">
+                            {% if solicitud.mascota.foto %}
+                            <img src="{{ solicitud.mascota.foto.url }}" alt="{{ solicitud.mascota.nombre }}">
+                            {% else %}
+                            <img src="{% static 'images/default-pet.jpg' %}" alt="{{ solicitud.mascota.nombre }}">
+                            {% endif %}
+                        </div>
+                        <div class="pet-details">
+                            <h3>{{ solicitud.mascota.nombre }}</h3>
+                            <div class="pet-meta">
+                                <span class="pet-breed">{{ solicitud.mascota.raza }}</span>
+                                <span class="pet-age">{{ solicitud.mascota.edad }} año{{ solicitud.mascota.edad|pluralize }}</span>
+                                <span class="pet-size">{{ solicitud.mascota.get_tamaño_display }}</span>
+                            </div>
+                            <div class="status-badge accepted">✅ Aceptada</div>
+                        </div>
+                    </div>
+                    
+                    <div class="applicant-details">
+                        <h4>👤 {{ solicitud.adoptante.get_nombre_completo }}</h4>
+                        <div class="contact-info">
+                            <p><strong>Email:</strong> {{ solicitud.adoptante.email }}</p>
+                            <p><strong>Teléfono:</strong> {{ solicitud.adoptante.telefono|default:"No proporcionado" }}</p>
+                            <p><strong>Dirección:</strong> {{ solicitud.adoptante.direccion }}</p>
+                        </div>
+                        
+                        {% if solicitud.adoptante.perfil_adoptante %}
+                        <div class="applicant-profile">
+                            <h4>Información del Adoptante</h4>
+                            <p><strong>Ocupación:</strong> {{ solicitud.adoptante.perfil_adoptante.ocupacion }}</p>
+                            <p><strong>Experiencia con mascotas:</strong> {{ solicitud.adoptante.perfil_adoptante.experiencia_mascotas }}</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <div class="solicitud-actions">
+                    <form method="post" class="concretar-form">
+                        {% csrf_token %}
+                        <input type="hidden" name="solicitud_id" value="{{ solicitud.id }}">
+                        <button type="submit" class="btn btn-success btn-large" 
+                                onclick="return confirm('¿Estás seguro de concretar la adopción de {{ solicitud.mascota.nombre }} por {{ solicitud.adoptante.get_nombre_completo }}? Esta acción no se puede deshacer.')">
+                            🏠 Concretar Adopción
+                        </button>
+                    </form>
+                    <p class="help-text">La mascota será marcada como adoptada y se generará el PDF del compromiso.</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-requests">
+            <h3>No hay adopciones pendientes de concretar</h3>
+            <p>Todas las solicitudes aceptadas han sido procesadas o no hay solicitudes en estado aceptado.</p>
+            <div class="action-links">
+                <a href="{% url 'adopciones:procesar_solicitud' %}" class="btn btn-secondary">Ir a Procesar Solicitudes</a>
+                <a href="{% url 'adopciones:dashboard' %}" class="btn btn-outline">Volver al Dashboard</a>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<style>
+/* Solo CSS necesario que no existe en main.css */
+.request-pet-header {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.pet-image-small {
+    width: 80px;
+    height: 80px;
+    border-radius: 10px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.pet-image-small img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.applicant-details {
+    margin-top: 1.5rem;
+}
+
+.applicant-details h4 {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+}
+
+.contact-info {
+    margin-bottom: 1rem;
+}
+
+.contact-info p {
+    margin: 0.3rem 0;
+    color: #555;
+}
+
+.accepted-request {
+    border-left: 4px solid #27ae60;
+}
+
+.status-badge.accepted {
+    background: #d4edda;
+    color: #155724;
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.solicitud-actions {
+    text-align: center;
+    border-top: 1px solid #eee;
+    padding-top: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.help-text {
+    font-size: 0.9rem;
+    color: #7f8c8d;
+    margin-top: 0.5rem;
+}
+
+.action-links {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-top: 1rem;
+}
+
+.btn-outline {
+    background: transparent;
+    color: #3498db;
+    border: 2px solid #3498db;
+    text-decoration: none;
+    padding: 0.7rem 1.5rem;
+    border-radius: 5px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.btn-outline:hover {
+    background: #3498db;
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .request-pet-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .action-links {
+        flex-direction: column;
+    }
+    
+    .btn-outline {
+        width: 100%;
+        text-align: center;
+    }
+}
+</style>
+{% endblock %}

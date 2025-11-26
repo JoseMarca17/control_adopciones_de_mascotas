@@ -9,6 +9,9 @@
             <h1>Procesar Solicitudes para {{ mascota.nombre }}</h1>
             <div class="queue-info">
                 <span class="queue-badge">{{ cantidad_solicitudes }} solicitudes en cola</span>
+                <span class="pet-status {% if not mascota.disponible %}not-available{% endif %}">
+                    {% if mascota.disponible %}🟢 Disponible{% else %}🔴 Adoptada{% endif %}
+                </span>
             </div>
         </div>
 
@@ -38,11 +41,31 @@
                     <p>{{ solicitud_actual.notas|default:"No se proporcionaron notas." }}</p>
                 </div>
                 
+                <div class="request-status-info">
+                    <h4>Estado actual: 
+                        <span class="status-badge {{ solicitud_actual.estado }}">
+                            {% if solicitud_actual.estado == 'espera' %}⏳ En espera
+                            {% elif solicitud_actual.estado == 'aceptado' %}✅ Aceptado
+                            {% elif solicitud_actual.estado == 'rechazado' %}❌ Rechazado
+                            {% elif solicitud_actual.estado == 'concretado' %}🏠 Concretado
+                            {% endif %}
+                        </span>
+                    </h4>
+                </div>
+                
                 <form method="post" class="decision-form">
                     {% csrf_token %}
                     <div class="form-actions">
-                        <button type="submit" name="accion" value="aceptar" class="btn btn-success">Aceptar Solicitud</button>
-                        <button type="submit" name="accion" value="rechazar" class="btn btn-danger">Rechazar Solicitud</button>
+                        {% if solicitud_actual.estado == 'espera' %}
+                        <button type="submit" name="accion" value="aceptar" class="btn btn-success">✅ Aceptar Solicitud</button>
+                        <button type="submit" name="accion" value="rechazar" class="btn btn-danger">❌ Rechazar Solicitud</button>
+                        {% elif solicitud_actual.estado == 'aceptado' %}
+                        <button type="submit" name="accion" value="concretar" class="btn btn-primary" 
+                                onclick="return confirm('¿Estás seguro de concretar esta adopción? La mascota será marcada como NO disponible y la adopción se completará.')">
+                            🏠 Concretar Adopción
+                        </button>
+                        <a href="{% url 'adopciones:procesar_solicitud' %}" class="btn btn-secondary">↩️ Volver a la lista</a>
+                        {% endif %}
                     </div>
                 </form>
             </div>
@@ -51,9 +74,84 @@
         <div class="no-requests">
             <h3>No hay más solicitudes para esta mascota</h3>
             <p>Todas las solicitudes han sido procesadas.</p>
-            <a href="{% url 'process_requests' %}" class="btn btn-primary">Volver a la lista</a>
+            <a href="{% url 'adopciones:procesar_solicitud' %}" class="btn btn-primary">Volver a la lista</a>
         </div>
         {% endif %}
     </div>
 </section>
+
+<style>
+.process-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.queue-info {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.queue-badge {
+    background: #3498db;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+.pet-status {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+.pet-status.not-available {
+    background: #e74c3c;
+    color: white;
+}
+
+.request-status-info {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 10px;
+}
+
+.status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+.status-badge.espera { background: #fff3cd; color: #856404; }
+.status-badge.aceptado { background: #d4edda; color: #155724; }
+.status-badge.rechazado { background: #f8d7da; color: #721c24; }
+.status-badge.concretado { background: #cce7ff; color: #004085; }
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+    .process-header {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .form-actions .btn {
+        width: 100%;
+    }
+}
+</style>
 {% endblock %}

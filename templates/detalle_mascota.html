@@ -50,7 +50,7 @@
                 
                 {% if user.is_authenticated and usuario_tiene_perfil_adoptante %}
                 <div class="adoption-section">
-                    <a href="{% url 'adoption_request' mascota.id %}" class="btn btn-primary btn-large">
+                    <a href="{% url 'adopciones:solicitud_adopcion' mascota.id %}" class="btn btn-primary btn-large">
                         🏠 Solicitar Adopción
                     </a>
                     <p class="help-text">Serás agregado a la lista de espera para esta mascota</p>

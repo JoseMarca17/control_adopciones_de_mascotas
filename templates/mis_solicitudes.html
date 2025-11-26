@@ -1,0 +1,391 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Mis Solicitudes de Adopción{% endblock %}
+
+{% block content %}
+<section class="my-requests">
+    <div class="container">
+        <div class="requests-header">
+            <h1>Mis Solicitudes de Adopción</h1>
+            <p>Revisa el estado de tus solicitudes de adopción</p>
+        </div>
+
+        {% if solicitudes %}
+        <div class="requests-list">
+            {% for solicitud in solicitudes %}
+            <div class="request-card {% if solicitud.estado == 'aceptado' %}accepted{% elif solicitud.estado == 'concretado' %}completed{% elif solicitud.estado == 'rechazado' %}rejected{% else %}pending{% endif %}">
+                <div class="request-pet-info">
+                    <div class="pet-image">
+                        {% if solicitud.mascota.foto %}
+                        <img src="{{ solicitud.mascota.foto.url }}" alt="{{ solicitud.mascota.nombre }}">
+                        {% else %}
+                        <img src="{% static 'images/default-pet.jpg' %}" alt="{{ solicitud.mascota.nombre }}">
+                        {% endif %}
+                    </div>
+                    <div class="pet-details">
+                        <h3>{{ solicitud.mascota.nombre }}</h3>
+                        <p>{{ solicitud.mascota.raza }} • {{ solicitud.mascota.edad }} año{{ solicitud.mascota.edad|pluralize }}</p>
+                        <p class="request-date">Solicitado: {{ solicitud.fecha_solicitud|date:"d/m/Y" }}</p>
+                        
+                        <!-- Información adicional de la mascota -->
+                        <div class="pet-meta-info">
+                            <span class="size-tag {{ solicitud.mascota.tamaño }}">{{ solicitud.mascota.get_tamaño_display }}</span>
+                            {% if solicitud.mascota.vacunado %}
+                            <span class="health-tag">💉 Vacunado</span>
+                            {% endif %}
+                            {% if solicitud.mascota.esterilizado %}
+                            <span class="health-tag">✂️ Esterilizado</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="request-status">
+                    <span class="status-badge {{ solicitud.estado }}">
+                        {% if solicitud.estado == 'espera' %}
+                        ⏳ En espera
+                        {% elif solicitud.estado == 'aceptado' %}
+                        ✅ Aceptado
+                        {% elif solicitud.estado == 'rechazado' %}
+                        ❌ Rechazado
+                        {% elif solicitud.estado == 'concretado' %}
+                        🏠 Adopción concretada
+                        {% endif %}
+                    </span>
+                    
+                    <!-- Información específica por estado -->
+                    {% if solicitud.estado == 'espera' %}
+                    <div class="waiting-info">
+                        <p class="info-text">Tu solicitud está en revisión</p>
+                        <a href="{% url 'adopciones:detalles_mascota' solicitud.mascota.id %}" class="btn btn-outline">
+                            Ver mascota
+                        </a>
+                    </div>
+                    
+                    {% elif solicitud.estado == 'aceptado' %}
+                    <div class="acceptance-actions">
+                        <p class="success-message">¡Felicidades! Tu solicitud fue aceptada.</p>
+                        <div class="action-buttons">
+                            <a href="{% url 'adopciones:detalles_mascota' solicitud.mascota.id %}" class="btn btn-primary">
+                                Ver detalles
+                            </a>
+                            <span class="contact-info">Pronto nos contactaremos contigo</span>
+                        </div>
+                    </div>
+                    
+                    {% elif solicitud.estado == 'rechazado' %}
+                    <div class="rejection-info">
+                        <p class="warning-message">Lo sentimos, tu solicitud no fue aprobada</p>
+                        <a href="{% url 'adopciones:catalog' %}" class="btn btn-secondary">
+                            Ver otras mascotas
+                        </a>
+                    </div>
+                    
+                    {% elif solicitud.estado == 'concretado' %}
+                    <div class="completion-info">
+                        <p class="success-message">¡Adopción completada!</p>
+                        <div class="action-buttons">
+                            {% if solicitud.compromisoadopcion and solicitud.compromisoadopcion.documento_pdf %}
+                            <a href="{{ solicitud.compromisoadopcion.documento_pdf.url }}" class="btn btn-success" target="_blank">
+                                📄 Descargar Compromiso
+                            </a>
+                            {% else %}
+                            <span class="info-text">Compromiso de adopción</span>
+                            {% endif %}
+                            <a href="{% url 'adopciones:detalles_mascota' solicitud.mascota.id %}" class="btn btn-outline">
+                                Recordatorio
+                            </a>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="no-requests">
+            <div class="no-requests-icon">📋</div>
+            <h3>No tienes solicitudes de adopción</h3>
+            <p>Visita nuestro catálogo para encontrar tu mascota ideal y comenzar el proceso de adopción.</p>
+            <a href="{% url 'adopciones:catalog' %}" class="btn btn-primary">Ver Mascotas Disponibles</a>
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+<style>
+.requests-header {
+    text-align: center;
+    margin-bottom: 3rem;
+}
+
+.request-card {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-left: 5px solid #95a5a6;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.request-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.request-card.accepted {
+    border-left-color: #27ae60;
+    background: linear-gradient(135deg, #fff, #d4edda);
+}
+
+.request-card.completed {
+    border-left-color: #3498db;
+    background: linear-gradient(135deg, #fff, #d1ecf1);
+}
+
+.request-card.rejected {
+    border-left-color: #e74c3c;
+    background: linear-gradient(135deg, #fff, #f8d7da);
+}
+
+.request-card.pending {
+    border-left-color: #f39c12;
+    background: linear-gradient(135deg, #fff, #fff3cd);
+}
+
+.request-pet-info {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    flex: 1;
+}
+
+.request-pet-info .pet-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 10px;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.request-pet-info .pet-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.pet-details h3 {
+    margin: 0 0 0.5rem 0;
+    color: #2c3e50;
+    font-size: 1.3rem;
+}
+
+.pet-details p {
+    margin: 0.2rem 0;
+    color: #7f8c8d;
+}
+
+.request-date {
+    font-size: 0.9rem;
+    color: #95a5a6;
+    margin-bottom: 0.8rem;
+}
+
+.pet-meta-info {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-top: 0.5rem;
+}
+
+.size-tag, .health-tag {
+    padding: 0.2rem 0.6rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.size-tag.pequeño { background: #d4edda; color: #155724; }
+.size-tag.mediano { background: #cce7ff; color: #004085; }
+.size-tag.grande { background: #f8d7da; color: #721c24; }
+
+.health-tag {
+    background: #e2e3e5;
+    color: #383d41;
+}
+
+.request-status {
+    text-align: center;
+    min-width: 200px;
+}
+
+.status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    display: inline-block;
+    margin-bottom: 1rem;
+}
+
+.status-badge.espera { background: #fff3cd; color: #856404; }
+.status-badge.aceptado { background: #d4edda; color: #155724; }
+.status-badge.rechazado { background: #f8d7da; color: #721c24; }
+.status-badge.concretado { background: #cce7ff; color: #004085; }
+
+.waiting-info,
+.acceptance-actions,
+.rejection-info,
+.completion-info {
+    text-align: center;
+}
+
+.info-text {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.success-message {
+    color: #155724;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+}
+
+.warning-message {
+    color: #856404;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+}
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.contact-info {
+    font-size: 0.8rem;
+    color: #6c757d;
+    font-style: italic;
+}
+
+.btn {
+    padding: 0.6rem 1.2rem;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    text-align: center;
+}
+
+.btn-primary {
+    background: #3498db;
+    color: white;
+}
+
+.btn-primary:hover {
+    background: #2980b9;
+    transform: translateY(-1px);
+}
+
+.btn-success {
+    background: #27ae60;
+    color: white;
+}
+
+.btn-success:hover {
+    background: #219a52;
+    transform: translateY(-1px);
+}
+
+.btn-secondary {
+    background: #95a5a6;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #7f8c8d;
+    transform: translateY(-1px);
+}
+
+.btn-outline {
+    background: transparent;
+    color: #3498db;
+    border: 2px solid #3498db;
+}
+
+.btn-outline:hover {
+    background: #3498db;
+    color: white;
+    transform: translateY(-1px);
+}
+
+.no-requests {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.no-requests-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.no-requests h3 {
+    color: #7f8c8d;
+    margin-bottom: 1rem;
+}
+
+.no-requests p {
+    color: #7f8c8d;
+    margin-bottom: 2rem;
+    line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+    .request-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 1.5rem;
+    }
+    
+    .request-pet-info {
+        flex-direction: column;
+    }
+    
+    .request-status {
+        min-width: auto;
+        width: 100%;
+    }
+    
+    .pet-meta-info {
+        justify-content: center;
+    }
+    
+    .action-buttons {
+        width: 100%;
+    }
+    
+    .btn {
+        width: 100%;
+        max-width: 200px;
+    }
+}
+</style>
+{% endblock %}
