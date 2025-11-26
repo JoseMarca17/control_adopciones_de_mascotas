@@ -1,0 +1,192 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Registrarse - Adopción de Mascotas{% endblock %}
+
+{% block content %}
+<section class="register">
+    <div class="container">
+        <div class="register-card">
+            <div class="register-header">
+                <h1>Crear Cuenta</h1>
+                <p>Únete a nuestra comunidad y encuentra a tu compañero perfecto</p>
+            </div>
+
+            <form method="post" class="register-form">
+                {% csrf_token %}
+                
+                {% if form.errors %}
+                <div class="error-message">
+                    <p>Por favor, corrige los errores below:</p>
+                    {{ form.errors }}
+                </div>
+                {% endif %}
+                
+                <div class="form-group">
+                    <label for="id_email">Email</label>
+                    {{ form.email }}
+                    {% if form.email.errors %}
+                    <div class="field-errors">
+                        {{ form.email.errors }}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_first_name">Nombre</label>
+                    {{ form.first_name }}
+                    {% if form.first_name.errors %}
+                    <div class="field-errors">
+                        {{ form.first_name.errors }}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_last_name">Apellido</label>
+                    {{ form.last_name }}
+                    {% if form.last_name.errors %}
+                    <div class="field-errors">
+                        {{ form.last_name.errors }}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_password1">Contraseña</label>
+                    {{ form.password1 }}
+                    {% if form.password1.help_text %}
+                    <small class="help-text">{{ form.password1.help_text }}</small>
+                    {% endif %}
+                    {% if form.password1.errors %}
+                    <div class="field-errors">
+                        {{ form.password1.errors }}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-group">
+                    <label for="id_password2">Confirmar Contraseña</label>
+                    {{ form.password2 }}
+                    {% if form.password2.help_text %}
+                    <small class="help-text">{{ form.password2.help_text }}</small>
+                    {% endif %}
+                    {% if form.password2.errors %}
+                    <div class="field-errors">
+                        {{ form.password2.errors }}
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary btn-full">Registrarse</button>
+                </div>
+                
+                <div class="register-links">
+                    <p>¿Ya tienes cuenta? <a href="{% url 'login' %}">Inicia sesión aquí</a></p>
+                </div>
+            </form>
+            
+            <div class="benefits-info">
+                <h3>Beneficios de registrarte</h3>
+                <ul>
+                    <li>✅ Solicitar adopción de mascotas</li>
+                    <li>✅ Seguir tu posición en las listas de espera</li>
+                    <li>✅ Guardar tus mascotas favoritas</li>
+                    <li>✅ Recibir notificaciones de nuevas mascotas</li>
+                    <li>✅ Gestionar todas tus solicitudes en un solo lugar</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+.register-card {
+    max-width: 800px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    background: white;
+    padding: 3rem;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.register-header {
+    grid-column: 1 / -1;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.register-header h1 {
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+
+.register-header p {
+    color: #6c757d;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+.help-text {
+    color: #6c757d;
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+    display: block;
+}
+
+.field-errors {
+    color: #e74c3c;
+    font-size: 0.8rem;
+    margin-top: 0.25rem;
+}
+
+.benefits-info {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 10px;
+}
+
+.benefits-info h3 {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+}
+
+.benefits-info ul {
+    list-style: none;
+    padding: 0;
+}
+
+.benefits-info li {
+    margin-bottom: 0.5rem;
+    color: #27ae60;
+}
+
+@media (max-width: 768px) {
+    .register-card {
+        grid-template-columns: 1fr;
+        padding: 2rem;
+    }
+}
+</style>
+{% endblock %}

@@ -19,4 +19,5 @@ urlpatterns = [
     path('admin/mascotas/', views.listar_mascotas, name='listar_mascotas'),
     path('admin/editar-mascota/<uuid:mascota_id>/', views.editar_mascota, name='editar_mascota'),
     path('admin/eliminar-mascota/<uuid:mascota_id>/', views.eliminar_mascota, name='eliminar_mascota'),
+    path('registrar/', views.registrar_usuario, name='registrar_usuario'),
 ]

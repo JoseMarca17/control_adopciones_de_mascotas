@@ -66,3 +66,26 @@ class FormularioRegistroAdoptante(forms.ModelForm):
             'first_name': 'Nombre',
             'last_name': 'Apellido',
         }
+
+from django import forms
+from django.contrib.auth.forms import UserCreationForm
+from .models import Usuario
+
+class FormularioRegistroUsuario(UserCreationForm):
+    email = forms.EmailField(required=True, label='Email')
+    first_name = forms.CharField(required=True, label='Nombre')
+    last_name = forms.CharField(required=True, label='Apellido')
+    
+    class Meta:
+        model = Usuario
+        fields = ['email', 'first_name', 'last_name', 'password1', 'password2']
+    
+    def save(self, commit=True):
+        usuario = super().save(commit=False)
+        usuario.email = self.cleaned_data['email']
+        usuario.first_name = self.cleaned_data['first_name']
+        usuario.last_name = self.cleaned_data['last_name']
+        
+        if commit:
+            usuario.save()
+        return usuario

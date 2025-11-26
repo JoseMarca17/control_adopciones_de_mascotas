@@ -77,36 +77,23 @@ def solicitud_adopcion(request, mascota_id):
 
 @login_required
 def registrar_adoptante(request):
+    """Registrar información del adoptante - Solo usuarios autenticados no administradores"""
     if usuario_es_administrador(request.user):
         messages.info(request, 'Los administradores no pueden registrarse como adoptantes.')
-        return redirect('index')
+        return redirect('adopciones:index')  # ← CORREGIDO
     
+    # Verificar si ya es adoptante
     if usuario_tiene_perfil_adoptante(request.user):
         messages.info(request, 'Ya estás registrado como adoptante.')
-        return redirect('catalog')
+        return redirect('adopciones:catalog')  # ← CORREGIDO
     
     if request.method == 'POST':
         form = FormularioRegistroAdoptante(request.POST)
         if form.is_valid():
-            request.user.first_name = form.cleaned_data['first_name']
-            request.user.last_name = form.cleaned_data['last_name']
-            request.user.telefono = form.cleaned_data['telefono']
-            request.user.direccion = form.cleaned_data['direccion']
-            request.user.save()
-            
-            perfil_adoptante = PerfilAdoptante(
-                usuario=request.user,
-                numero_identificacion=form.cleaned_data['numero_identificacion'],
-                ocupacion=form.cleaned_data['ocupacion'],
-                experiencia_mascotas=form.cleaned_data['experiencia_mascotas'],
-                tipo_vivienda=form.cleaned_data['tipo_vivienda'],
-                tiene_patio=form.cleaned_data['tiene_patio'],
-                otras_mascotas=form.cleaned_data['otras_mascotas']
-            )
-            perfil_adoptante.save()
+            # ... tu código existente ...
             
             messages.success(request, '¡Registro completado! Ahora puedes solicitar adopciones.')
-            return redirect('catalog')
+            return redirect('adopciones:catalog')  # ← CORREGIDO
     else:
         form = FormularioRegistroAdoptante(initial={
             'first_name': request.user.first_name,
@@ -188,14 +175,14 @@ def procesar_solicitud_mascota(request, mascota_id):
             solicitud_procesada.save()
             messages.warning(request, f'Solicitud de {solicitud_procesada.adoptante.get_nombre_completo()} rechazada.')
         
-        return redirect('procesar_solicitud_mascota', mascota_id=mascota_id)
+        return redirect('aplicacion:procesar_solicitud_mascota', mascota_id=mascota_id)
     
     context = {
         'mascota': mascota,
         'solicitud_actual': solicitud_actual,
         'cantidad_solicitudes': obtener_cantidad_solicitudes(mascota_id),
     }
-    return render(request, 'processr_solicitud_mascota.html', context)
+    return render(request, 'procesar_solicitud_mascota.html', context)
 
 @login_required
 @administrador_requerido
@@ -204,7 +191,7 @@ def generate_commitment(request, solicitud_id):
     
     if solicitud_adopcion.estado != 'aceptado':
         messages.error(request, 'La solicitud debe estar aceptada para generar el compromiso.')
-        return redirect('dashboard')
+        return redirect('aplicacion:dashboard')
     
     try:
         pdf_content = generar_compromiso_adopcion(solicitud_adopcion)
@@ -225,7 +212,7 @@ def generate_commitment(request, solicitud_id):
         
     except Exception as e:
         messages.error(request, f'Error al generar el PDF: {e}')
-        return redirect('dashboard')
+        return redirect('aplicacion:dashboard')
 
 @login_required
 @administrador_requerido
@@ -286,10 +273,8 @@ def download_report_pdf(request):
 @login_required
 @administrador_requerido
 def editar_mascota(request, mascota_id):
-    """Editar mascota existente - Solo administradores"""
     mascota = get_object_or_404(Mascota, id=mascota_id)
     
-    # Verificar si la mascota puede ser editada
     if not mascota.puede_ser_editada():
         messages.error(request, 'No se puede editar esta mascota porque tiene solicitudes de adopción aceptadas o concretadas.')
         return redirect('adopciones:listar_mascotas')
@@ -319,10 +304,8 @@ def editar_mascota(request, mascota_id):
 @login_required
 @administrador_requerido
 def eliminar_mascota(request, mascota_id):
-    """Eliminar mascota - Solo administradores"""
     mascota = get_object_or_404(Mascota, id=mascota_id)
     
-    # Verificar si la mascota puede ser eliminada
     if not mascota.puede_ser_eliminada():
         messages.error(request, 'No se puede eliminar esta mascota porque tiene solicitudes de adopción asociadas.')
         return redirect('adopciones:listar_mascotas')
@@ -330,11 +313,9 @@ def eliminar_mascota(request, mascota_id):
     if request.method == 'POST':
         nombre_mascota = mascota.nombre
         
-        # Eliminar del árbol
         from .utils import arbol_mascotas
         arbol_mascotas.eliminar(mascota)
         
-        # Eliminar la mascota
         mascota.delete()
         
         messages.success(request, f'Mascota "{nombre_mascota}" eliminada exitosamente.')
@@ -347,9 +328,47 @@ def eliminar_mascota(request, mascota_id):
 @login_required
 @administrador_requerido
 def listar_mascotas(request):
-    """Listar todas las mascotas para administración - Solo administradores"""
     mascotas = Mascota.objects.all().order_by('-fecha_creacion')
     
     return render(request, 'listar_mascotas.html', {
         'mascotas': mascotas
     })
+
+from django.contrib.auth import logout
+from django.shortcuts import redirect
+
+
+def custom_logout(request):
+    """Vista de logout que acepta tanto GET como POST"""
+    if request.method in ['GET', 'POST']:
+        logout(request)
+        return redirect('/')
+    return redirect('/')
+
+from django.contrib.auth import login, authenticate
+from django.shortcuts import render, redirect
+from .forms import FormularioRegistroUsuario  
+
+def registrar_usuario(request):
+    if request.method == 'POST':
+        form = FormularioRegistroUsuario(request.POST)
+        if form.is_valid():
+            usuario = form.save()
+            email = form.cleaned_data.get('email')
+            password = form.cleaned_data.get('password1')
+            usuario = authenticate(email=email, password=password)
+            
+            if usuario is not None:
+                login(request, usuario)
+                messages.success(request, '¡Registro exitoso! Bienvenido/a.')
+                
+
+                if usuario.es_administrador:
+                    return redirect('adopciones:dashboard')
+                else:
+                    return redirect('adopciones:catalog')
+                    
+    else:
+        form = FormularioRegistroUsuario()
+    
+    return render(request, 'registrar_usuario.html', {'form': form})
