@@ -28,7 +28,6 @@ document.addEventListener('DOMContentLoaded', function() {
         filterSize.addEventListener('change', filterPets);
     }
     
-    // Auto-ocultar mensajes después de 5 segundos
     const messages = document.querySelectorAll('.message');
     messages.forEach(message => {
         setTimeout(() => {
@@ -42,11 +41,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Funciones para reportes
     window.generatePDFReport = function() {
         alert('Generando reporte PDF...');
-        // Aquí iría la lógica para generar PDF
     };
     
     window.generateCSVReport = function() {
         alert('Generando reporte CSV...');
-        // Aquí iría la lógica para generar CSV
     };
 });

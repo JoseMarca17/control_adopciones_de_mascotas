@@ -89,7 +89,18 @@ def usuario_es_administrador(usuario):
     return usuario.is_authenticated and hasattr(usuario, 'es_administrador') and usuario.es_administrador
 
 def usuario_es_adoptante(usuario):
-    return usuario.is_authenticated and hasattr(usuario, 'es_adoptante') and usuario.es_adoptante
+    if not usuario.is_authenticated:
+        return False
+    return usuario.rol == 'adoptante'
 
 def usuario_tiene_perfil_adoptante(usuario):
-    return usuario_es_adoptante(usuario) and hasattr(usuario, 'perfil_adoptante')
+    if not usuario.is_authenticated:
+        return False
+    
+    if hasattr(usuario, 'perfil_adoptante'):
+        try:
+            _ = usuario.perfil_adoptante
+            return True
+        except:
+            return False
+    return False

@@ -1,0 +1,276 @@
+{% extends 'base.html' %}
+
+{% block title %}{% if administrador.is_active %}Desactivar{% else %}Activar{% endif %} Administrador{% endblock %}
+
+{% block content %}
+<section class="deactivate-admin-section">
+    <div class="container">
+        <div class="admin-form-card">
+            <div class="admin-form-header">
+                <div class="admin-form-icon">
+                    {% if administrador.is_active %}⛔{% else %}✅{% endif %}
+                </div>
+                <h1>{% if administrador.is_active %}Desactivar{% else %}Activar{% endif %} Administrador</h1>
+                <p class="admin-form-subtitle">
+                    {% if administrador.is_active %}
+                    Desactivarás la cuenta de <strong>{{ administrador.get_nombre_completo }}</strong>
+                    {% else %}
+                    Activarás la cuenta de <strong>{{ administrador.get_nombre_completo }}</strong>
+                    {% endif %}
+                </p>
+            </div>
+            
+            {% if messages %}
+            <div class="messages-container">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <div class="admin-info-card warning">
+                <h4>⚠️ {% if administrador.is_active %}ADVERTENCIA: Desactivación de Cuenta{% else %}INFORMACIÓN: Activación de Cuenta{% endif %}</h4>
+                <p>
+                    {% if administrador.is_active %}
+                    Al desactivar esta cuenta:
+                    <ul>
+                        <li>❌ El administrador no podrá iniciar sesión</li>
+                        <li>❌ Perderá todos los privilegios temporalmente</li>
+                        <li>✅ Los datos se conservan y puede reactivarse</li>
+                        <li>✅ No se eliminan mascotas ni solicitudes asociadas</li>
+                    </ul>
+                    {% else %}
+                    Al activar esta cuenta:
+                    <ul>
+                        <li>✅ El administrador podrá iniciar sesión nuevamente</li>
+                        <li>✅ Recuperará todos sus privilegios</li>
+                        <li>✅ Tendrá acceso completo al sistema</li>
+                    </ul>
+                    {% endif %}
+                </p>
+            </div>
+            
+            <form method="post" class="admin-form">
+                {% csrf_token %}
+                
+                <div class="security-section">
+                    <div class="form-group">
+                        <label for="{{ form.admin_password.id_for_label }}" class="form-label">
+                            🔒 Verifica tu identidad
+                        </label>
+                        <p class="verification-text">
+                            Para {% if administrador.is_active %}desactivar{% else %}activar{% endif %} esta cuenta, 
+                            debes ingresar <strong>tu contraseña de administrador</strong>:
+                        </p>
+                        {{ form.admin_password }}
+                        {% if form.admin_password.errors %}
+                        <div class="error">{{ form.admin_password.errors }}</div>
+                        {% endif %}
+                        <small class="form-text">{{ form.admin_password.help_text }}</small>
+                    </div>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn {% if administrador.is_active %}btn-danger{% else %}btn-success{% endif %}">
+                        {% if administrador.is_active %}
+                        ⛔ Confirmar Desactivación
+                        {% else %}
+                        ✅ Confirmar Activación
+                        {% endif %}
+                    </button>
+                    <a href="{% url 'adopciones:listar_administradores' %}" class="btn btn-secondary">
+                        ↩️ Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<style>
+.deactivate-admin-section {
+    padding: 3rem 0;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    min-height: 80vh;
+}
+
+.admin-form-card {
+    max-width: 600px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    padding: 3rem;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    border: 2px solid {% if administrador.is_active %}#e74c3c{% else %}#27ae60{% endif %};
+}
+
+.admin-form-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.admin-form-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.admin-form-header h1 {
+    color: #2c3e50;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.admin-form-subtitle {
+    color: #6c757d;
+    font-size: 1.1rem;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+.admin-info-card.warning {
+    background: {% if administrador.is_active %}#f8d7da{% else %}#d4edda{% endif %};
+    border: 1px solid {% if administrador.is_active %}#f5c6cb{% else %}#c3e6cb{% endif %};
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    color: {% if administrador.is_active %}#721c24{% else %}#155724{% endif %};
+}
+
+.admin-info-card.warning h4 {
+    color: {% if administrador.is_active %}#721c24{% else %}#155724{% endif %};
+    margin-bottom: 1rem;
+}
+
+.admin-info-card.warning ul {
+    margin: 1rem 0 0 0;
+    padding-left: 1.5rem;
+}
+
+.admin-info-card.warning li {
+    margin-bottom: 0.5rem;
+}
+
+.security-section {
+    margin: 2rem 0;
+}
+
+.verification-text {
+    color: #495057;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #2c3e50;
+}
+
+.admin-form input {
+    width: 100%;
+    padding: 1rem;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+}
+
+.admin-form input:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    background: white;
+}
+
+.form-text {
+    display: block;
+    margin-top: 0.3rem;
+    color: #6c757d;
+    font-size: 0.85rem;
+}
+
+.error {
+    color: #e74c3c;
+    font-size: 0.85rem;
+    margin-top: 0.3rem;
+    font-weight: 500;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+}
+
+.btn {
+    padding: 1rem 2rem;
+    border: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    flex: 1;
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+}
+
+.btn-danger:hover {
+    background: linear-gradient(135deg, #c0392b, #a93226);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(231, 76, 60, 0.3);
+}
+
+.btn-success {
+    background: linear-gradient(135deg, #27ae60, #219a52);
+    color: white;
+}
+
+.btn-success:hover {
+    background: linear-gradient(135deg, #219a52, #1e8449);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3);
+}
+
+.btn-secondary {
+    background: #95a5a6;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #7f8c8d;
+    transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+    .admin-form-card {
+        padding: 2rem;
+        margin: 1rem;
+    }
+    
+    .form-actions {
+        flex-direction: column;
+    }
+    
+    .btn {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %}

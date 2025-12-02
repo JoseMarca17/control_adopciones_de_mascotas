@@ -33,10 +33,15 @@ class AdminPerfilAdoptante(admin.ModelAdmin):
 
 @admin.register(Mascota)
 class AdminMascota(admin.ModelAdmin):
-    list_display = ['nombre', 'tipo_mascota', 'raza', 'edad', 'disponible', 'fecha_ingreso']
-    list_filter = ['tipo_mascota', 'tamaño', 'disponible', 'vacunado', 'esterilizado']
+    list_display = ['nombre', 'tipo_mascota', 'raza', 'sexo', 'edad_display', 'disponible', 'fecha_ingreso']
+    list_filter = ['tipo_mascota', 'sexo', 'tamaño', 'disponible', 'vacunado', 'esterilizado']
     search_fields = ['nombre', 'raza']
     readonly_fields = ['fecha_creacion']
+    
+    def edad_display(self, obj):
+        return obj.edad_display
+    edad_display.short_description = 'Edad'
+    edad_display.admin_order_field = 'edad_valor'
 
 @admin.register(SolicitudAdopcion)
 class AdminSolicitudAdopcion(admin.ModelAdmin):

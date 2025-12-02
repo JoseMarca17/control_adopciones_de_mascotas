@@ -19,7 +19,7 @@ class ManejadorUsuarioPersonalizado(BaseUserManager):
         extra_fields.setdefault('is_superuser', True)
         extra_fields.setdefault('is_active', True)
         extra_fields.setdefault('rol', 'administrador')
-        return self.create_user(email, password, **extra_fields)  # 
+        return self.create_user(email, password, **extra_fields)
 
 class Usuario(AbstractUser):
     ROLES = [
@@ -243,11 +243,23 @@ class Mascota(models.Model):
         ('grande', 'Grande'),
     ]
     
+    UNIDADES_EDAD = [
+        ('meses', 'Meses'),
+        ('años', 'Años'),
+    ]
+    
+    SEXOS = [
+        ('macho', 'Macho'),
+        ('hembra', 'Hembra'),
+    ]
+    
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     nombre = models.CharField('nombre', max_length=100)
     tipo_mascota = models.CharField('tipo', max_length=20, choices=TIPOS_MASCOTA)
     raza = models.CharField('raza', max_length=100)
-    edad = models.IntegerField('edad (años)')
+    sexo = models.CharField('sexo', max_length=10, choices=SEXOS, default='macho')
+    edad_valor = models.IntegerField('edad', help_text="Ingresa la edad")
+    edad_unidad = models.CharField('unidad de edad', max_length=10, choices=UNIDADES_EDAD, default='meses')
     tamaño = models.CharField('tamaño', max_length=20, choices=TAMAÑOS)
     descripcion = models.TextField('descripción')
     foto = models.ImageField('foto', upload_to='mascotas/')
@@ -263,7 +275,6 @@ class Mascota(models.Model):
         verbose_name = 'mascota'
         verbose_name_plural = 'mascotas'
         ordering = ['-fecha_creacion']
-        
     
     def __str__(self):
         return f"{self.nombre} - {self.get_tipo_mascota_display()}"
@@ -274,8 +285,40 @@ class Mascota(models.Model):
     def puede_ser_eliminada(self):
         return not self.solicitudadopcion_set.exists()
     
-    def __str__(self):
-        return f"{self.nombre} - {self.get_tipo_mascota_display()}"
+    @property
+    def edad_display(self):
+        """Muestra la edad formateada (ej: '6 meses' o '2 años')"""
+        return f"{self.edad_valor} {self.get_edad_unidad_display().lower()}"
+    
+    @property
+    def edad_en_meses(self):
+        """Devuelve la edad en meses (para cálculos)"""
+        if self.edad_unidad == 'meses':
+            return self.edad_valor
+        else:  # años
+            return self.edad_valor * 12
+    
+    @property
+    def edad_en_años(self):
+        """Devuelve la edad en años (para cálculos)"""
+        if self.edad_unidad == 'años':
+            return self.edad_valor
+        else:  # meses
+            return self.edad_valor / 12
+    
+    def get_edad_categoria(self):
+        """Devuelve la categoría de edad: cachorro, joven, adulto"""
+        edad_meses = self.edad_en_meses
+        
+        if edad_meses <= 12:  # 1 año o menos
+            return 'cachorro'
+        elif 12 < edad_meses <= 36:  # 1-3 años
+            return 'joven'
+        else:  # Más de 3 años
+            return 'adulto'
+    
+    def get_icono_sexo(self):
+        return '♂️' if self.sexo == 'macho' else '♀️'
 
 class SolicitudAdopcion(models.Model):
     

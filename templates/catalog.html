@@ -13,115 +13,128 @@
 
 <section class="catalog">
     <div class="container">
-        <!-- Filtros mejorados -->
-        <div class="filters-card">
-            <h3>Filtrar Mascotas</h3>
-            <div class="filters-grid">
-                <div class="filter-group">
-                    <label for="filter-type">Tipo de Mascota</label>
+        <!-- Filtros -->
+        <div class="filters-section">
+            <h3>🔍 Filtrar Mascotas</h3>
+            <div class="filters-container">
+                <div class="filter-item">
+                    <label for="filter-type">Tipo</label>
                     <select id="filter-type" class="filter-select">
-                        <option value="all">Todos los tipos</option>
+                        <option value="all">Todos</option>
                         <option value="perro">🐕 Perros</option>
                         <option value="gato">🐈 Gatos</option>
                     </select>
                 </div>
-                <div class="filter-group">
+                <div class="filter-item">
                     <label for="filter-size">Tamaño</label>
                     <select id="filter-size" class="filter-select">
-                        <option value="all">Todos los tamaños</option>
+                        <option value="all">Todos</option>
                         <option value="pequeño">Pequeño</option>
                         <option value="mediano">Mediano</option>
                         <option value="grande">Grande</option>
                     </select>
                 </div>
-                <div class="filter-group">
+                <div class="filter-item">
+                    <label for="filter-sex">Sexo</label>
+                    <select id="filter-sex" class="filter-select">
+                        <option value="all">Todos</option>
+                        <option value="macho">♂️ Macho</option>
+                        <option value="hembra">♀️ Hembra</option>
+                    </select>
+                </div>
+                <div class="filter-item">
                     <label for="filter-age">Edad</label>
                     <select id="filter-age" class="filter-select">
-                        <option value="all">Todas las edades</option>
+                        <option value="all">Todas</option>
                         <option value="cachorro">Cachorro (0-1 año)</option>
                         <option value="joven">Joven (1-3 años)</option>
                         <option value="adulto">Adulto (3+ años)</option>
                     </select>
                 </div>
-                <button id="reset-filters" class="btn btn-outline">Limpiar Filtros</button>
+                <div class="filter-item">
+                    <button id="reset-filters" class="btn-reset">🔄 Limpiar</button>
+                </div>
             </div>
         </div>
 
-        <!-- Contador de resultados -->
-        <div class="results-info">
+        <!-- Contador -->
+        <div class="results-counter">
             <span id="results-count">{{ mascotas|length }}</span> mascotas encontradas
         </div>
 
         <!-- Grid de mascotas -->
-        <div class="pets-grid">
+        <div class="mascotas-grid">
             {% for mascota in mascotas %}
-            <div class="pet-card" data-type="{{ mascota.tipo_mascota }}" data-size="{{ mascota.tamaño }}" data-age="{{ mascota.edad }}">
-                <div class="pet-image-container">
+            <div class="mascota-card" 
+                 data-type="{{ mascota.tipo_mascota }}" 
+                 data-size="{{ mascota.tamaño }}" 
+                 data-sex="{{ mascota.sexo }}"
+                 data-age-meses="{{ mascota.edad_en_meses }}">
+                <!-- Imagen de la mascota -->
+                <div class="mascota-img-container">
                     {% if mascota.foto %}
-                    <img src="{{ mascota.foto.url }}" alt="{{ mascota.nombre }}" class="pet-image">
+                    <img src="{{ mascota.foto.url }}" alt="{{ mascota.nombre }}" class="mascota-img">
                     {% else %}
-                    <img src="{% static 'images/default-pet.jpg' %}" alt="{{ mascota.nombre }}" class="pet-image">
+                    <img src="{% static 'images/default-pet.jpg' %}" alt="{{ mascota.nombre }}" class="mascota-img">
                     {% endif %}
-                    <div class="pet-overlay">
-                        <div class="pet-type-badge {% if mascota.tipo_mascota == 'perro' %}dog-badge{% else %}cat-badge{% endif %}">
-                            {{ mascota.get_tipo_mascota_display }}
-                        </div>
-                        <div class="pet-actions-overlay">
-                            <a href="{% url 'adopciones:detalles_mascota' mascota.id %}" class="btn-overlay">
-                                👀 Ver Detalles
-                            </a>
-                        </div>
+                    
+                    <!-- Badge de tipo -->
+                    <div class="mascota-badge {% if mascota.tipo_mascota == 'perro' %}badge-perro{% else %}badge-gato{% endif %}">
+                        {% if mascota.tipo_mascota == 'perro' %}🐕{% else %}🐈{% endif %}
+                    </div>
+                    
+                    <!-- Estado -->
+                    <div class="mascota-estado {% if mascota.disponible %}disponible{% else %}adoptado{% endif %}">
+                        {% if mascota.disponible %}Disponible{% else %}Adoptado{% endif %}
+                    </div>
+                    
+                    <!-- Botón Ver más (solo en hover) -->
+                    <div class="ver-mas-overlay">
+                        <a href="{% url 'adopciones:detalles_mascota' mascota.id %}" class="btn-ver-mas">
+                            👀 Ver Detalles
+                        </a>
                     </div>
                 </div>
-                
-                <div class="pet-info">
-                    <div class="pet-header">
-                        <h3 class="pet-name">{{ mascota.nombre }}</h3>
-                        <span class="pet-age-badge">{{ mascota.edad }} año{{ mascota.edad|pluralize }}</span>
+
+                <!-- Información de la mascota -->
+                <div class="mascota-info">
+                    <!-- Nombre y edad -->
+                    <div class="mascota-header">
+                        <h3 class="mascota-nombre">{{ mascota.nombre }}</h3>
+                        <span class="mascota-edad">{{ mascota.edad_display }}</span>
                     </div>
                     
-                    <p class="pet-breed">🐾 {{ mascota.raza }}</p>
+                    <!-- Raza y Sexo -->
+                    <div class="mascota-subinfo">
+                        <span class="mascota-raza">{{ mascota.raza }}</span>
+                        <span class="mascota-sexo sexo-{{ mascota.sexo }}">
+                            {{ mascota.get_icono_sexo }} {{ mascota.get_sexo_display }}
+                        </span>
+                    </div>
                     
-                    <div class="pet-meta">
-                        <span class="size-tag {{ mascota.tamaño }}">{{ mascota.get_tamaño_display }}</span>
+                    <!-- Características -->
+                    <div class="mascota-caracteristicas">
+                        <span class="mascota-tamaño {{ mascota.tamaño }}">{{ mascota.get_tamaño_display }}</span>
                         {% if mascota.vacunado %}
-                        <span class="health-tag vaccinated">✓ Vacunado</span>
+                        <span class="caracteristica vacunado">✓ Vacunado</span>
                         {% endif %}
                         {% if mascota.esterilizado %}
-                        <span class="health-tag sterilized">✓ Esterilizado</span>
+                        <span class="caracteristica esterilizado">✓ Esterilizado</span>
+                        {% endif %}
+                        {% if mascota.desparasitado %}
+                        <span class="caracteristica desparasitado">✓ Desparasitado</span>
                         {% endif %}
                     </div>
                     
-                    <p class="pet-description">{{ mascota.descripcion|truncatewords:15 }}</p>
-                    
-                    <div class="pet-actions">
-                        <a href="{% url 'adopciones:detalles_mascota' mascota.id %}" class="btn btn-outline btn-small">
-                            Más Información
-                        </a>
-                        
-                        {% if user.is_authenticated %}
-                            {% if user.perfiladoptante %}
-                            <a href="{% url 'adopciones:solicitud_adopcion' mascota.id %}" class="btn btn-primary btn-small">
-                                🏠 Adoptar
-                            </a>
-                            {% else %}
-                            <a href="{% url 'adopciones:registrar_adoptante' %}" class="btn btn-warning btn-small">
-                                Completar Perfil
-                            </a>
-                            {% endif %}
-                        {% else %}
-                        <a href="{% url 'login' %}?next={{ request.path }}" class="btn btn-secondary btn-small">
-                            Iniciar Sesión
-                        </a>
-                        {% endif %}
-                    </div>
+                    <!-- Descripción -->
+                    <p class="mascota-descripcion">{{ mascota.descripcion|truncatewords:20 }}</p>
                 </div>
             </div>
             {% empty %}
-            <div class="no-pets">
-                <div class="no-pets-icon">🐾</div>
-                <h3>No hay mascotas disponibles en este momento</h3>
-                <p>Vuelve pronto para conocer a nuestros nuevos amigos que buscan hogar.</p>
+            <div class="no-mascotas">
+                <div class="no-mascotas-icon">🐾</div>
+                <h3>No hay mascotas disponibles</h3>
+                <p>¡Vuelve pronto para conocer a nuestros nuevos amigos!</p>
             </div>
             {% endfor %}
         </div>
@@ -129,366 +142,399 @@
 </section>
 
 <style>
-/* Estilos mejorados para el catálogo */
+/* ========== CABECERA ========== */
 .catalog-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #4a90e2 0%, #63b3ed 100%);
     color: white;
-    padding: 4rem 0;
+    padding: 3rem 0;
     text-align: center;
     margin-bottom: 2rem;
 }
 
 .catalog-header h1 {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
+    font-size: 2.2rem;
+    margin-bottom: 0.5rem;
     font-weight: 700;
 }
 
 .catalog-header p {
-    font-size: 1.2rem;
+    font-size: 1.1rem;
     opacity: 0.9;
+    max-width: 600px;
+    margin: 0 auto;
 }
 
-/* Filtros mejorados */
-.filters-card {
+/* ========== FILTROS ========== */
+.filters-section {
     background: white;
-    padding: 2rem;
-    border-radius: 15px;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-    margin-bottom: 2rem;
+    padding: 1.5rem;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+    margin-bottom: 1.5rem;
 }
 
-.filters-card h3 {
-    margin-bottom: 1.5rem;
-    color: #2c3e50;
+.filters-section h3 {
+    color: #2d3748;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
     font-weight: 600;
 }
 
-.filters-grid {
+.filters-container {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
     align-items: end;
 }
 
-.filter-group {
+.filter-item {
     display: flex;
     flex-direction: column;
 }
 
-.filter-group label {
+.filter-item label {
     margin-bottom: 0.5rem;
-    font-weight: 600;
-    color: #555;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
+    color: #4a5568;
+    font-weight: 500;
 }
 
 .filter-select {
-    padding: 0.8rem 1rem;
-    border: 2px solid #e9ecef;
-    border-radius: 10px;
-    font-size: 0.95rem;
-    transition: all 0.3s ease;
+    padding: 0.7rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.9rem;
     background: white;
+    color: #2d3748;
+    transition: all 0.2s ease;
+    cursor: pointer;
 }
 
 .filter-select:focus {
     outline: none;
-    border-color: #3498db;
-    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
 }
 
-/* Información de resultados */
-.results-info {
-    margin-bottom: 1.5rem;
-    padding: 1rem;
-    background: #e8f4fc;
-    border-radius: 10px;
-    border-left: 4px solid #3498db;
+.btn-reset {
+    padding: 0.7rem 1rem;
+    background: #f7fafc;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    color: #4a5568;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 0.9rem;
+}
+
+.btn-reset:hover {
+    background: #edf2f7;
+    border-color: #cbd5e0;
+}
+
+/* ========== CONTADOR ========== */
+.results-counter {
+    background: #e6fffa;
+    border: 1px solid #81e6d9;
+    border-radius: 8px;
+    padding: 0.8rem 1.2rem;
+    margin-bottom: 2rem;
     font-weight: 600;
-    color: #2c3e50;
+    color: #285e61;
 }
 
-/* Grid de mascotas mejorado */
-.pets-grid {
+#results-count {
+    font-size: 1.2rem;
+    color: #2c7a7b;
+}
+
+/* ========== GRID DE MASCOTAS ========== */
+.mascotas-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
     gap: 2rem;
 }
 
-.pet-card {
+/* ========== TARJETA DE MASCOTA ========== */
+.mascota-card {
     background: white;
-    border-radius: 15px;
+    border-radius: 12px;
     overflow: hidden;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
     transition: all 0.3s ease;
-    border: 1px solid #f0f0f0;
+    border: 1px solid #e2e8f0;
 }
 
-.pet-card:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+.mascota-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0,0,0,0.12);
 }
 
-/* Contenedor de imagen mejorado */
-.pet-image-container {
+/* Contenedor de imagen */
+.mascota-img-container {
     position: relative;
-    height: 250px;
+    height: 220px;
     overflow: hidden;
 }
 
-.pet-image {
+.mascota-img {
     width: 100%;
     height: 100%;
     object-fit: cover;
     transition: transform 0.5s ease;
 }
 
-.pet-card:hover .pet-image {
+.mascota-card:hover .mascota-img {
     transform: scale(1.05);
 }
 
-.pet-overlay {
+/* Badge de tipo */
+.mascota-badge {
     position: absolute;
-    top: 0;
+    top: 12px;
+    left: 12px;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    color: white;
+    z-index: 2;
+}
+
+.badge-perro {
+    background: linear-gradient(135deg, #e53e3e, #c53030);
+}
+
+.badge-gato {
+    background: linear-gradient(135deg, #805ad5, #6b46c1);
+}
+
+/* Estado */
+.mascota-estado {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: white;
+    z-index: 2;
+}
+
+.mascota-estado.disponible {
+    background: linear-gradient(135deg, #38a169, #2f855a);
+}
+
+.mascota-estado.adoptado {
+    background: linear-gradient(135deg, #718096, #4a5568);
+}
+
+/* Botón Ver más en overlay */
+.ver-mas-overlay {
+    position: absolute;
+    bottom: 0;
     left: 0;
     right: 0;
-    bottom: 0;
-    background: linear-gradient(to bottom, transparent 60%, rgba(0,0,0,0.7));
+    background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+    padding: 1.5rem;
     display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    padding: 1rem;
+    justify-content: center;
+    align-items: center;
     opacity: 0;
     transition: opacity 0.3s ease;
 }
 
-.pet-card:hover .pet-overlay {
+.mascota-card:hover .ver-mas-overlay {
     opacity: 1;
 }
 
-/* Badges mejorados */
-.pet-type-badge {
-    align-self: flex-start;
-    padding: 0.5rem 1rem;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: white;
-}
-
-.dog-badge {
-    background: linear-gradient(135deg, #e74c3c, #c0392b);
-}
-
-.cat-badge {
-    background: linear-gradient(135deg, #9b59b6, #8e44ad);
-}
-
-.btn-overlay {
-    background: rgba(255,255,255,0.95);
-    color: #2c3e50;
-    padding: 0.7rem 1.2rem;
+.btn-ver-mas {
+    background: rgba(255, 255, 255, 0.95);
+    color: #2d3748;
+    padding: 0.6rem 1.2rem;
     border-radius: 25px;
     text-decoration: none;
     font-weight: 600;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     transition: all 0.3s ease;
-    align-self: center;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
 }
 
-.btn-overlay:hover {
+.btn-ver-mas:hover {
     background: white;
     transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.25);
 }
 
 /* Información de la mascota */
-.pet-info {
+.mascota-info {
     padding: 1.5rem;
 }
 
-.pet-header {
+/* Header (nombre y edad) */
+.mascota-header {
     display: flex;
     justify-content: space-between;
     align-items: flex-start;
-    margin-bottom: 0.8rem;
+    margin-bottom: 0.5rem;
 }
 
-.pet-name {
-    color: #2c3e50;
+.mascota-nombre {
+    color: #2d3748;
     font-size: 1.3rem;
     font-weight: 700;
     margin: 0;
 }
 
-.pet-age-badge {
-    background: #ffeaa7;
-    color: #856404;
+.mascota-edad {
+    background: #fed7d7;
+    color: #c53030;
     padding: 0.3rem 0.7rem;
-    border-radius: 15px;
+    border-radius: 12px;
     font-size: 0.8rem;
     font-weight: 600;
 }
 
-.pet-breed {
-    color: #7f8c8d;
-    font-weight: 500;
-    margin-bottom: 1rem;
-    font-size: 0.95rem;
-}
-
-.pet-meta {
+/* Raza y Sexo */
+.mascota-subinfo {
     display: flex;
-    gap: 0.5rem;
-    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
     margin-bottom: 1rem;
 }
 
-.size-tag, .health-tag {
+.mascota-raza {
+    color: #718096;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.mascota-sexo {
     padding: 0.3rem 0.7rem;
     border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.sexo-macho {
+    background: #bee3f8;
+    color: #2c5282;
+}
+
+.sexo-hembra {
+    background: #fed7e2;
+    color: #97266d;
+}
+
+/* Características */
+.mascota-caracteristicas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    margin-bottom: 1rem;
+}
+
+.mascota-tamaño, .caracteristica {
+    padding: 0.3rem 0.6rem;
+    border-radius: 8px;
     font-size: 0.75rem;
     font-weight: 600;
 }
 
-.size-tag.pequeño { background: #d4edda; color: #155724; }
-.size-tag.mediano { background: #cce7ff; color: #004085; }
-.size-tag.grande { background: #f8d7da; color: #721c24; }
+.mascota-tamaño.pequeño { background: #c6f6d5; color: #22543d; }
+.mascota-tamaño.mediano { background: #bee3f8; color: #2c5282; }
+.mascota-tamaño.grande { background: #fed7d7; color: #742a2a; }
 
-.health-tag.vaccinated { background: #d1ecf1; color: #0c5460; }
-.health-tag.sterilized { background: #e2e3e5; color: #383d41; }
+.caracteristica.vacunado { background: #e6fffa; color: #285e61; }
+.caracteristica.esterilizado { background: #faf5ff; color: #553c9a; }
+.caracteristica.desparasitado { background: #fffaf0; color: #744210; }
 
-.pet-description {
-    color: #555;
+/* Descripción */
+.mascota-descripcion {
+    color: #4a5568;
     font-size: 0.9rem;
     line-height: 1.5;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
 
-/* Botones mejorados */
-.pet-actions {
-    display: flex;
-    gap: 0.7rem;
-    flex-wrap: wrap;
-}
-
-.btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.7rem 1.2rem;
-    border: none;
-    border-radius: 10px;
-    text-decoration: none;
-    font-weight: 600;
-    font-size: 0.85rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    text-align: center;
-    flex: 1;
-    min-width: 120px;
-}
-
-.btn-small {
-    padding: 0.6rem 1rem;
-    font-size: 0.8rem;
-    min-width: 100px;
-    flex: none;
-}
-
-.btn-primary {
-    background: linear-gradient(135deg, #3498db, #2980b9);
-    color: white;
-    box-shadow: 0 3px 10px rgba(52, 152, 219, 0.3);
-}
-
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
-}
-
-.btn-secondary {
-    background: #95a5a6;
-    color: white;
-}
-
-.btn-secondary:hover {
-    background: #7f8c8d;
-    transform: translateY(-2px);
-}
-
-.btn-warning {
-    background: linear-gradient(135deg, #f39c12, #e67e22);
-    color: white;
-}
-
-.btn-warning:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 5px 15px rgba(243, 156, 18, 0.4);
-}
-
-.btn-outline {
-    background: transparent;
-    color: #3498db;
-    border: 2px solid #3498db;
-}
-
-.btn-outline:hover {
-    background: #3498db;
-    color: white;
-    transform: translateY(-2px);
-}
-
-/* Estado sin mascotas */
-.no-pets {
+/* Sin mascotas */
+.no-mascotas {
+    grid-column: 1 / -1;
     text-align: center;
     padding: 4rem 2rem;
-    grid-column: 1 / -1;
+    background: #f7fafc;
+    border-radius: 12px;
+    border: 2px dashed #cbd5e0;
 }
 
-.no-pets-icon {
+.no-mascotas-icon {
     font-size: 4rem;
     margin-bottom: 1rem;
+    color: #a0aec0;
 }
 
-.no-pets h3 {
-    color: #7f8c8d;
-    margin-bottom: 1rem;
+.no-mascotas h3 {
+    color: #4a5568;
+    margin-bottom: 0.5rem;
 }
 
-/* Responsive */
+.no-mascotas p {
+    color: #718096;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+/* ========== RESPONSIVE ========== */
 @media (max-width: 768px) {
-    .pets-grid {
+    .mascotas-grid {
         grid-template-columns: 1fr;
         gap: 1.5rem;
     }
     
-    .filters-grid {
+    .filters-container {
         grid-template-columns: 1fr;
     }
     
-    .pet-actions {
-        flex-direction: column;
-    }
-    
-    .btn {
-        width: 100%;
+    .catalog-header {
+        padding: 2rem 0;
     }
     
     .catalog-header h1 {
-        font-size: 2rem;
+        font-size: 1.8rem;
     }
 }
 
 @media (max-width: 480px) {
-    .pet-header {
+    .mascota-header {
         flex-direction: column;
+        align-items: flex-start;
         gap: 0.5rem;
     }
     
-    .pet-age-badge {
+    .mascota-edad {
         align-self: flex-start;
+    }
+    
+    .mascota-img-container {
+        height: 180px;
+    }
+    
+    .mascota-subinfo {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
     }
 }
 </style>
@@ -498,59 +544,75 @@
 document.addEventListener('DOMContentLoaded', function() {
     const filterType = document.getElementById('filter-type');
     const filterSize = document.getElementById('filter-size');
+    const filterSex = document.getElementById('filter-sex');
     const filterAge = document.getElementById('filter-age');
     const resetFilters = document.getElementById('reset-filters');
-    const petCards = document.querySelectorAll('.pet-card');
+    const mascotaCards = document.querySelectorAll('.mascota-card');
     const resultsCount = document.getElementById('results-count');
 
-    function filterPets() {
-        const selectedType = filterType.value;
-        const selectedSize = filterSize.value;
-        const selectedAge = filterAge.value;
+    function filtrarMascotas() {
+        const tipoSeleccionado = filterType.value;
+        const tamañoSeleccionado = filterSize.value;
+        const sexoSeleccionado = filterSex.value;
+        const edadSeleccionada = filterAge.value;
         
-        let visibleCount = 0;
+        let mascotasVisibles = 0;
 
-        petCards.forEach(card => {
-            const type = card.getAttribute('data-type');
-            const size = card.getAttribute('data-size');
-            const age = parseFloat(card.getAttribute('data-age'));
+        mascotaCards.forEach(card => {
+            const tipo = card.getAttribute('data-type');
+            const tamaño = card.getAttribute('data-size');
+            const sexo = card.getAttribute('data-sex');
+            const edadEnMeses = parseFloat(card.getAttribute('data-age-meses'));
 
-            const typeMatch = selectedType === 'all' || type === selectedType;
-            const sizeMatch = selectedSize === 'all' || size === selectedSize;
+            const coincideTipo = tipoSeleccionado === 'all' || tipo === tipoSeleccionado;
+            const coincideTamaño = tamañoSeleccionado === 'all' || tamaño === tamañoSeleccionado;
+            const coincideSexo = sexoSeleccionado === 'all' || sexo === sexoSeleccionado;
             
-            let ageMatch = true;
-            if (selectedAge !== 'all') {
-                if (selectedAge === 'cachorro') ageMatch = age <= 1;
-                else if (selectedAge === 'joven') ageMatch = age > 1 && age <= 3;
-                else if (selectedAge === 'adulto') ageMatch = age > 3;
+            let coincideEdad = true;
+            if (edadSeleccionada !== 'all') {
+                if (edadSeleccionada === 'cachorro') coincideEdad = edadEnMeses <= 12;
+                else if (edadSeleccionada === 'joven') coincideEdad = edadEnMeses > 12 && edadEnMeses <= 36;
+                else if (edadSeleccionada === 'adulto') coincideEdad = edadEnMeses > 36;
             }
 
-            if (typeMatch && sizeMatch && ageMatch) {
+            if (coincideTipo && coincideTamaño && coincideSexo && coincideEdad) {
                 card.style.display = 'block';
-                visibleCount++;
+                mascotasVisibles++;
             } else {
                 card.style.display = 'none';
             }
         });
 
-        resultsCount.textContent = visibleCount;
+        resultsCount.textContent = mascotasVisibles;
+        
+        // Mostrar mensaje si no hay resultados
+        const noMascotasElement = document.querySelector('.no-mascotas');
+        if (noMascotasElement) {
+            if (mascotasVisibles === 0) {
+                noMascotasElement.style.display = 'block';
+            } else {
+                noMascotasElement.style.display = 'none';
+            }
+        }
     }
 
-    function resetAllFilters() {
+    function reiniciarFiltros() {
         filterType.value = 'all';
         filterSize.value = 'all';
+        filterSex.value = 'all';
         filterAge.value = 'all';
-        filterPets();
+        filtrarMascotas();
     }
 
     // Event listeners
-    filterType.addEventListener('change', filterPets);
-    filterSize.addEventListener('change', filterPets);
-    filterAge.addEventListener('change', filterPets);
-    resetFilters.addEventListener('click', resetAllFilters);
+    filterType.addEventListener('change', filtrarMascotas);
+    filterSize.addEventListener('change', filtrarMascotas);
+    filterSex.addEventListener('change', filtrarMascotas);
+    filterAge.addEventListener('change', filtrarMascotas);
+    resetFilters.addEventListener('click', reiniciarFiltros);
 
-    // Inicializar contador
-    filterPets();
+    // Inicializar
+    filtrarMascotas();
 });
 </script>
 {% endblock %}

@@ -1,0 +1,421 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Editar {{ mascota.nombre }} - Administración{% endblock %}
+
+{% block content %}
+<section class="form-section">
+    <div class="container">
+        <div class="form-header">
+            <h1>✏️ Editar Mascota: {{ mascota.nombre }}</h1>
+            <p>Actualiza la información de esta mascota</p>
+        </div>
+
+        <div class="form-container">
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                
+                <div class="form-grid">
+                    <!-- Información Básica -->
+                    <div class="form-card">
+                        <h3>Información Básica</h3>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.nombre.id_for_label }}">Nombre *</label>
+                            {{ form.nombre }}
+                            {% if form.nombre.errors %}
+                            <div class="error">{{ form.nombre.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="{{ form.tipo_mascota.id_for_label }}">Tipo *</label>
+                                {{ form.tipo_mascota }}
+                                {% if form.tipo_mascota.errors %}
+                                <div class="error">{{ form.tipo_mascota.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ form.raza.id_for_label }}">Raza *</label>
+                                {{ form.raza }}
+                                {% if form.raza.errors %}
+                                <div class="error">{{ form.raza.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="{{ form.sexo.id_for_label }}">Sexo *</label>
+                                {{ form.sexo }}
+                                {% if form.sexo.errors %}
+                                <div class="error">{{ form.sexo.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ form.tamaño.id_for_label }}">Tamaño *</label>
+                                {{ form.tamaño }}
+                                {% if form.tamaño.errors %}
+                                <div class="error">{{ form.tamaño.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="{{ form.edad_valor.id_for_label }}">Edad *</label>
+                                {{ form.edad_valor }}
+                                {% if form.edad_valor.errors %}
+                                <div class="error">{{ form.edad_valor.errors }}</div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="{{ form.edad_unidad.id_for_label }}">Unidad *</label>
+                                {{ form.edad_unidad }}
+                                {% if form.edad_unidad.errors %}
+                                <div class="error">{{ form.edad_unidad.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Foto y Estado -->
+                    <div class="form-card">
+                        <h3>Foto y Estado</h3>
+                        
+                        <!-- Foto actual -->
+                        <div class="current-photo">
+                            <h4>Foto Actual</h4>
+                            {% if mascota.foto %}
+                            <img src="{{ mascota.foto.url }}" alt="{{ mascota.nombre }}" class="current-photo-img">
+                            {% else %}
+                            <div class="no-photo">
+                                <span>📷 Sin foto</span>
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.foto.id_for_label }}">Nueva Foto (opcional)</label>
+                            <div class="file-upload">
+                                {{ form.foto }}
+                                <label for="{{ form.foto.id_for_label }}" class="file-label">
+                                    📁 Cambiar imagen
+                                </label>
+                            </div>
+                            {% if form.foto.errors %}
+                            <div class="error">{{ form.foto.errors }}</div>
+                            {% endif %}
+                            <small class="help-text">Deja en blanco para mantener la foto actual</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.disponible.id_for_label }}" class="checkbox-label">
+                                {{ form.disponible }} Disponible para adopción
+                            </label>
+                            {% if form.disponible.errors %}
+                            <div class="error">{{ form.disponible.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <h4>Estado de Salud</h4>
+                            <div class="checkboxes-grid">
+                                <label class="checkbox-label">
+                                    {{ form.vacunado }} Vacunado
+                                </label>
+                                <label class="checkbox-label">
+                                    {{ form.esterilizado }} Esterilizado
+                                </label>
+                                <label class="checkbox-label">
+                                    {{ form.desparasitado }} Desparasitado
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Descripción -->
+                <div class="form-card">
+                    <h3>Descripción</h3>
+                    <div class="form-group">
+                        <label for="{{ form.descripcion.id_for_label }}">Descripción *</label>
+                        {{ form.descripcion }}
+                        {% if form.descripcion.errors %}
+                        <div class="error">{{ form.descripcion.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Observaciones Médicas -->
+                <div class="form-card">
+                    <h3>Observaciones Médicas</h3>
+                    <div class="form-group">
+                        <label for="{{ form.observaciones_medicas.id_for_label }}">Observaciones</label>
+                        {{ form.observaciones_medicas }}
+                        {% if form.observaciones_medicas.errors %}
+                        <div class="error">{{ form.observaciones_medicas.errors }}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                
+                <!-- Botones -->
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        💾 Guardar Cambios
+                    </button>
+                    <a href="{% url 'adopciones:listar_mascotas' %}" class="btn btn-secondary">
+                        ↩️ Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<style>
+/* Estilos del formulario (igual que agregar_mascota) */
+.form-section {
+    padding: 2rem 0;
+    background: #f8fafc;
+}
+
+.form-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.form-header h1 {
+    color: #2d3748;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.form-header p {
+    color: #718096;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.form-container {
+    background: white;
+    border-radius: 12px;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-card {
+    background: #f8fafc;
+    border-radius: 10px;
+    padding: 1.5rem;
+    border: 1px solid #e2e8f0;
+}
+
+.form-card h3 {
+    color: #2d3748;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #4299e1;
+    font-size: 1.2rem;
+}
+
+.form-card h4 {
+    color: #4a5568;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+}
+
+.current-photo {
+    margin-bottom: 1.5rem;
+}
+
+.current-photo-img {
+    width: 100%;
+    max-width: 200px;
+    height: auto;
+    border-radius: 8px;
+    border: 2px solid #e2e8f0;
+}
+
+.no-photo {
+    background: #edf2f7;
+    border: 2px dashed #cbd5e0;
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    color: #718096;
+}
+
+.form-group {
+    margin-bottom: 1.5rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    color: #4a5568;
+    font-size: 0.95rem;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    background: white;
+}
+
+.form-control:focus {
+    outline: none;
+    border-color: #4299e1;
+    box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.1);
+}
+
+textarea.form-control {
+    resize: vertical;
+    min-height: 120px;
+}
+
+select.form-control {
+    cursor: pointer;
+}
+
+.file-upload {
+    position: relative;
+    overflow: hidden;
+}
+
+.file-upload input[type="file"] {
+    position: absolute;
+    left: 0;
+    top: 0;
+    opacity: 0;
+    cursor: pointer;
+    height: 100%;
+    width: 100%;
+}
+
+.file-label {
+    display: block;
+    padding: 0.8rem 1.5rem;
+    background: #edf2f7;
+    border: 2px dashed #cbd5e0;
+    border-radius: 8px;
+    text-align: center;
+    color: #4a5568;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.file-label:hover {
+    background: #e2e8f0;
+    border-color: #a0aec0;
+}
+
+.checkboxes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    color: #4a5568;
+    font-weight: 500;
+}
+
+.form-check-input {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e2e8f0;
+}
+
+.btn {
+    padding: 0.8rem 2rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.2s ease;
+    font-size: 1rem;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #4299e1, #3182ce);
+    color: white;
+}
+
+.btn-primary:hover {
+    background: linear-gradient(135deg, #3182ce, #2c5282);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(66, 153, 225, 0.3);
+}
+
+.btn-secondary {
+    background: #718096;
+    color: white;
+}
+
+.btn-secondary:hover {
+    background: #4a5568;
+    transform: translateY(-2px);
+}
+
+.error {
+    color: #e53e3e;
+    font-size: 0.85rem;
+    margin-top: 0.3rem;
+    font-weight: 500;
+}
+
+.help-text {
+    display: block;
+    margin-top: 0.3rem;
+    color: #a0aec0;
+    font-size: 0.85rem;
+}
+</style>
+{% endblock %}

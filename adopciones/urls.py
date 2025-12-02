@@ -22,4 +22,8 @@ urlpatterns = [
     path('registrar/', views.registrar_usuario, name='registrar_usuario'),
     path('mis-solicitudes/', views.mis_solicitudes, name='mis_solicitudes'),
     path('concretar-adopciones/', views.concretar_adopciones_aceptadas, name='concretar_adopciones_aceptadas'),
+    path('administradores/', views.listar_administradores, name='listar_administradores'),
+    path('administradores/crear/', views.crear_administrador, name='crear_administrador'),
+    path('administradores/editar/<uuid:administrador_id>/', views.editar_administrador, name='editar_administrador'),
+    path('administradores/desactivar/<uuid:administrador_id>/', views.desactivar_administrador, name='desactivar_administrador'),
 ]

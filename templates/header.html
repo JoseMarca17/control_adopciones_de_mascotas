@@ -1,7 +1,7 @@
 <header class="header">
     <div class="container">
         <div class="logo">
-            <h1><a href="{% url 'adopciones:index' %}">🐾 Adopta un Amigo</a></h1>
+            <h1><a href="{% url 'adopciones:index' %}">🐾 Patitas Felices</a></h1>
         </div>
         
         <nav class="nav">
@@ -22,11 +22,13 @@
                         </button>
                         <div class="dropdown-content">
                             {% if user.is_authenticated and user.es_administrador %}
+
                                 <a href="{% url 'adopciones:dashboard' %}">🏠 Panel Admin</a>
                                 <a href="{% url 'adopciones:agregar_mascota' %}">➕ Agregar Mascota</a>
                                 <a href="{% url 'adopciones:procesar_solicitud' %}">📋 Procesar Solicitudes</a>
                                 <a href="{% url 'adopciones:concretar_adopciones_aceptadas' %}">🏠 Concretar Adopciones</a>
                                 <a href="{% url 'adopciones:reports' %}">📊 Reportes</a>
+                                <a href="{% url 'adopciones:listar_administradores' %}">👨‍💼 Administradores</a>
                             {% elif user.is_authenticated and not user.es_administrador %}
                                 {% if user.perfil_adoptante %}
                                     <a href="{% url 'adopciones:mis_solicitudes' %}">📋 Mis Solicitudes</a>

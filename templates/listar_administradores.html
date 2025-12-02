@@ -1,0 +1,897 @@
+{% extends 'base.html' %}
+
+{% block title %}Lista de Administradores{% endblock %}
+
+{% block content %}
+<section class="admin-list-section">
+    <div class="container">
+        <div class="admin-list-header">
+            <h1>👨‍💼 Administradores del Sistema</h1>
+            <p class="subtitle">Gestión de usuarios con privilegios administrativos</p>
+        </div>
+        
+        <div class="admin-stats-cards">
+            <div class="stat-card">
+                <div class="stat-icon">👥</div>
+                <div class="stat-info">
+                    <h3>Total Administradores</h3>
+                    <p class="stat-number">{{ administradores.count }}</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">✅</div>
+                <div class="stat-info">
+                    <h3>Activos</h3>
+                    <p class="stat-number">{{ administradores_activos }}</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">⛔</div>
+                <div class="stat-info">
+                    <h3>Inactivos</h3>
+                    <p class="stat-number">{{ administradores_inactivos }}</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="admin-actions-bar">
+            <a href="{% url 'adopciones:crear_administrador' %}" class="btn-create-admin">
+                <span class="btn-icon">👑</span>
+                Crear Nuevo Administrador
+            </a>
+            <div class="search-box">
+                <input type="text" id="searchAdmin" placeholder="🔍 Buscar administrador..." class="search-input">
+            </div>
+        </div>
+        
+        <div class="admin-table-wrapper">
+            <table class="admin-table" id="adminTable">
+                <thead>
+                    <tr>
+                        <th class="text-center">#</th>
+                        <th>👤 Administrador</th>
+                        <th>📧 Email</th>
+                        <th>📞 Teléfono</th>
+                        <th class="text-center">📅 Registro</th>
+                        <th class="text-center">🔄 Último Acceso</th>
+                        <th class="text-center">✅ Estado</th>
+                        <th class="text-center">🔧 Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for admin in administradores %}
+                    <tr class="admin-row {% if not admin.is_active %}inactive-row{% endif %}">
+                        <td class="text-center">{{ forloop.counter }}</td>
+                        <td>
+                            <div class="admin-profile">
+                                <div class="admin-avatar">
+                                    {{ admin.first_name|first|upper }}{{ admin.last_name|first|upper }}
+                                </div>
+                                <div class="admin-details">
+                                    <strong class="admin-name">{{ admin.get_nombre_completo }}</strong>
+                                    {% if admin.id == request.user.id %}
+                                    <span class="you-badge">Tú</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="email-cell">
+                                <span class="email-text">{{ admin.email }}</span>
+                                {% if admin.is_staff %}
+                                <span class="staff-badge">Staff</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td>
+                            {% if admin.telefono %}
+                            <span class="phone-text">{{ admin.telefono }}</span>
+                            {% else %}
+                            <span class="no-phone">No registrado</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <span class="date-text">{{ admin.fecha_registro|date:"d/m/Y" }}</span>
+                        </td>
+                        <td class="text-center">
+                            {% if admin.last_login %}
+                            <span class="date-text">{{ admin.last_login|date:"d/m/Y H:i" }}</span>
+                            {% else %}
+                            <span class="never-text">Nunca</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-center">
+                            <div class="status-container">
+                                <span class="status-badge {% if admin.is_active %}status-active{% else %}status-inactive{% endif %}">
+                                    {% if admin.is_active %}
+                                    <span class="status-dot active-dot"></span> Activo
+                                    {% else %}
+                                    <span class="status-dot inactive-dot"></span> Inactivo
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </td>
+                        <td class="text-center">
+                            <div class="action-buttons">
+                                {% if admin.id != request.user.id %}
+                                <a href="{% url 'adopciones:editar_administrador' admin.id %}" 
+                                   class="action-btn edit-btn" 
+                                   title="Editar administrador">
+                                    <span class="btn-text">✏️ Editar</span>
+                                </a>
+                                <a href="{% url 'adopciones:desactivar_administrador' admin.id %}" 
+                                   class="action-btn {% if admin.is_active %}deactivate-btn{% else %}activate-btn{% endif %}" 
+                                   title="{% if admin.is_active %}Desactivar{% else %}Activar{% endif %} administrador">
+                                    <span class="btn-text">
+                                        {% if admin.is_active %}
+                                        ⛔ Desactivar
+                                        {% else %}
+                                        ✅ Activar
+                                        {% endif %}
+                                    </span>
+                                </a>
+                                {% else %}
+                                <div class="current-user-actions">
+                                    <span class="current-user-badge">Tu cuenta</span>
+                                    <a href="#" class="action-btn edit-profile-btn" title="Editar tu perfil">
+                                        <span class="btn-text">👤 Perfil</span>
+                                    </a>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="empty-message">
+                            <div class="empty-state">
+                                <div class="empty-icon">📭</div>
+                                <h3>No hay administradores registrados</h3>
+                                <p>Crea el primer administrador del sistema</p>
+                                <a href="{% url 'adopciones:crear_administrador' %}" class="btn-create-first">
+                                    👑 Crear Primer Administrador
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        {% if administradores.has_other_pages %}
+        <div class="pagination-container">
+            <div class="pagination-info">
+                Mostrando {{ administradores.start_index }} - {{ administradores.end_index }} de {{ administradores.paginator.count }} administradores
+            </div>
+            <div class="pagination">
+                {% if administradores.has_previous %}
+                <a href="?page=1" class="page-link first-page">« Primera</a>
+                <a href="?page={{ administradores.previous_page_number }}" class="page-link prev-page">‹ Anterior</a>
+                {% endif %}
+                
+                {% for num in administradores.paginator.page_range %}
+                    {% if administradores.number == num %}
+                    <span class="page-link current-page">{{ num }}</span>
+                    {% elif num > administradores.number|add:'-3' and num < administradores.number|add:'3' %}
+                    <a href="?page={{ num }}" class="page-link">{{ num }}</a>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if administradores.has_next %}
+                <a href="?page={{ administradores.next_page_number }}" class="page-link next-page">Siguiente ›</a>
+                <a href="?page={{ administradores.paginator.num_pages }}" class="page-link last-page">Última »</a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <div class="admin-info-section">
+            <div class="info-card">
+                <div class="info-icon">ℹ️</div>
+                <div class="info-content">
+                    <h3>Funciones de los Administradores</h3>
+                    <ul class="info-list">
+                        <li><span class="check-icon">✅</span> Gestión completa de mascotas (crear, editar, eliminar)</li>
+                        <li><span class="check-icon">✅</span> Procesamiento de solicitudes de adopción</li>
+                        <li><span class="check-icon">✅</span> Generación de reportes y estadísticas</li>
+                        <li><span class="check-icon">✅</span> Acceso al panel de administración</li>
+                        <li><span class="check-icon">✅</span> Creación de otros administradores</li>
+                        <li><span class="check-icon">✅</span> Gestión de usuarios adoptantes</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="warning-card">
+                <div class="warning-icon">⚠️</div>
+                <div class="warning-content">
+                    <h3>Consideraciones de Seguridad</h3>
+                    <ul class="warning-list">
+                        <li><span class="warning-icon-small">🔒</span> Los administradores tienen acceso completo al sistema</li>
+                        <li><span class="warning-icon-small">👥</span> Crea nuevos administradores solo cuando sea necesario</li>
+                        <li><span class="warning-icon-small">📊</span> Monitorea regularmente la actividad administrativa</li>
+                        <li><span class="warning-icon-small">🚫</span> Desactiva cuentas de administradores inactivos</li>
+                        <li><span class="warning-icon-small">🔑</span> Usa contraseñas seguras y cámbialas periódicamente</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<style>
+.admin-list-section {
+    padding: 2rem 0;
+    background: linear-gradient(135deg, #f5f7fa 0%, #e4e8f0 100%);
+    min-height: 100vh;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+}
+
+.admin-list-header {
+    text-align: center;
+    margin-bottom: 2.5rem;
+    padding: 0 1rem;
+}
+
+.admin-list-header h1 {
+    color: #2c3e50;
+    font-size: 2.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+}
+
+.admin-list-header .subtitle {
+    color: #6c757d;
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.5;
+}
+
+.admin-stats-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2.5rem;
+}
+
+.stat-card {
+    background: white;
+    border-radius: 15px;
+    padding: 1.5rem;
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: 1px solid #e9ecef;
+}
+
+.stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.stat-icon {
+    font-size: 2.5rem;
+    width: 60px;
+    height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    border-radius: 12px;
+    color: white;
+}
+
+.stat-info h3 {
+    color: #6c757d;
+    font-size: 0.9rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat-number {
+    color: #2c3e50;
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+.admin-actions-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+    background: white;
+    padding: 1.5rem;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+
+.btn-create-admin {
+    background: linear-gradient(135deg, #27ae60, #219a52);
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    font-size: 1rem;
+}
+
+.btn-create-admin:hover {
+    background: linear-gradient(135deg, #219a52, #1e8449);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(39, 174, 96, 0.3);
+}
+
+.btn-icon {
+    font-size: 1.2rem;
+}
+
+.search-box {
+    flex: 1;
+    max-width: 300px;
+}
+
+.search-input {
+    width: 100%;
+    padding: 0.8rem 1rem;
+    padding-left: 2.5rem;
+    border: 2px solid #e9ecef;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    background: #f8f9fa url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='%2395a5a6' viewBox='0 0 16 16'%3E%3Cpath d='M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001c.03.04.062.078.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1.007 1.007 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0z'/%3E%3C/svg%3E") no-repeat 1rem center;
+    background-size: 16px;
+}
+
+.search-input:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+    background-color: white;
+}
+
+.admin-table-wrapper {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+    margin-bottom: 2rem;
+    overflow-x: auto;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 1000px;
+}
+
+.admin-table thead {
+    background: linear-gradient(135deg, #2c3e50, #34495e);
+}
+
+.admin-table th {
+    padding: 1.2rem 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: white;
+    font-size: 0.9rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #3498db;
+}
+
+.admin-table th.text-center {
+    text-align: center;
+}
+
+.admin-table tbody tr {
+    border-bottom: 1px solid #f1f3f5;
+    transition: background 0.2s ease;
+}
+
+.admin-table tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+.admin-table tbody tr.inactive-row {
+    background-color: #fef5f5;
+}
+
+.admin-table tbody tr.inactive-row:hover {
+    background-color: #fde8e8;
+}
+
+.admin-table td {
+    padding: 1.2rem 1rem;
+    vertical-align: middle;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.admin-profile {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+}
+
+.admin-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 1rem;
+    flex-shrink: 0;
+}
+
+.admin-details {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+}
+
+.admin-name {
+    color: #2c3e50;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.you-badge {
+    background: #3498db;
+    color: white;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.email-cell {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.email-text {
+    color: #495057;
+    font-size: 0.95rem;
+}
+
+.staff-badge {
+    background: #ffc107;
+    color: #212529;
+    padding: 0.2rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: 600;
+}
+
+.phone-text {
+    color: #495057;
+    font-size: 0.95rem;
+}
+
+.no-phone {
+    color: #95a5a6;
+    font-style: italic;
+    font-size: 0.9rem;
+}
+
+.date-text {
+    color: #6c757d;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.never-text {
+    color: #95a5a6;
+    font-style: italic;
+    font-size: 0.9rem;
+}
+
+.status-container {
+    display: flex;
+    justify-content: center;
+}
+
+.status-badge {
+    padding: 0.4rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    min-width: 85px;
+    justify-content: center;
+}
+
+.status-active {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.status-inactive {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.active-dot {
+    background: #28a745;
+}
+
+.inactive-dot {
+    background: #dc3545;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.action-btn {
+    padding: 0.4rem 0.8rem;
+    border-radius: 6px;
+    text-decoration: none;
+    font-size: 0.85rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    transition: all 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.edit-btn {
+    background: #ffc107;
+    color: #212529;
+    border-color: #e0a800;
+}
+
+.edit-btn:hover {
+    background: #e0a800;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(255, 193, 7, 0.3);
+}
+
+.deactivate-btn {
+    background: #dc3545;
+    color: white;
+    border-color: #c82333;
+}
+
+.deactivate-btn:hover {
+    background: #c82333;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(220, 53, 69, 0.3);
+}
+
+.activate-btn {
+    background: #28a745;
+    color: white;
+    border-color: #218838;
+}
+
+.activate-btn:hover {
+    background: #218838;
+    transform: translateY(-1px);
+    box-shadow: 0 2px 5px rgba(40, 167, 69, 0.3);
+}
+
+.btn-text {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+}
+
+.current-user-actions {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.current-user-badge {
+    background: #3498db;
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+}
+
+.edit-profile-btn {
+    background: #6c757d;
+    color: white;
+    border-color: #545b62;
+    padding: 0.3rem 0.6rem;
+    font-size: 0.8rem;
+}
+
+.edit-profile-btn:hover {
+    background: #545b62;
+    transform: translateY(-1px);
+}
+
+.empty-message {
+    padding: 4rem 1rem !important;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 2rem;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+    color: #95a5a6;
+}
+
+.empty-state h3 {
+    color: #6c757d;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.empty-state p {
+    color: #95a5a6;
+    margin-bottom: 1.5rem;
+}
+
+.btn-create-first {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    padding: 0.8rem 1.5rem;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+}
+
+.btn-create-first:hover {
+    background: linear-gradient(135deg, #2980b9, #2573a7);
+    transform: translateY(-2px);
+    box-shadow: 0 8px 15px rgba(52, 152, 219, 0.3);
+}
+
+.pagination-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    margin-bottom: 2rem;
+    flex-wrap: wrap;
+    gap: 1rem;
+}
+
+.pagination-info {
+    color: #6c757d;
+    font-size: 0.9rem;
+    font-weight: 500;
+}
+
+.pagination {
+    display: flex;
+    gap: 0.3rem;
+}
+
+.page-link {
+    padding: 0.5rem 0.8rem;
+    border-radius: 6px;
+    text-decoration: none;
+    color: #495057;
+    font-weight: 500;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+    border: 1px solid #e9ecef;
+}
+
+.page-link:hover {
+    background: #f8f9fa;
+    border-color: #dee2e6;
+}
+
+.current-page {
+    background: #3498db;
+    color: white;
+    border-color: #3498db;
+}
+
+.first-page, .last-page, .prev-page, .next-page {
+    background: #f8f9fa;
+    color: #495057;
+}
+
+.admin-info-section {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+}
+
+.info-card, .warning-card {
+    background: white;
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+    border: 1px solid #e9ecef;
+}
+
+.info-card {
+    border-left: 4px solid #3498db;
+}
+
+.warning-card {
+    border-left: 4px solid #e74c3c;
+}
+
+.info-icon, .warning-icon {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+}
+
+.info-card h3, .warning-card h3 {
+    color: #2c3e50;
+    margin-bottom: 1rem;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.info-list, .warning-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.info-list li, .warning-list li {
+    padding: 0.5rem 0;
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    color: #495057;
+    line-height: 1.5;
+}
+
+.check-icon {
+    color: #27ae60;
+    font-size: 1.1rem;
+}
+
+.warning-icon-small {
+    color: #e74c3c;
+    font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+    .admin-list-header h1 {
+        font-size: 2rem;
+    }
+    
+    .admin-actions-bar {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .search-box {
+        max-width: 100%;
+    }
+    
+    .admin-stats-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .pagination-container {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .admin-info-section {
+        grid-template-columns: 1fr;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .action-btn {
+        width: 140px;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-list-header h1 {
+        font-size: 1.7rem;
+    }
+    
+    .stat-card {
+        flex-direction: column;
+        text-align: center;
+        gap: 1rem;
+    }
+    
+    .admin-table th, .admin-table td {
+        padding: 0.8rem 0.5rem;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const searchInput = document.getElementById('searchAdmin');
+    const adminTable = document.getElementById('adminTable');
+    const adminRows = adminTable.querySelectorAll('.admin-row');
+    
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase().trim();
+        
+        adminRows.forEach(row => {
+            const adminName = row.querySelector('.admin-name').textContent.toLowerCase();
+            const adminEmail = row.querySelector('.email-text').textContent.toLowerCase();
+            
+            if (adminName.includes(searchTerm) || adminEmail.includes(searchTerm)) {
+                row.style.display = '';
+            } else {
+                row.style.display = 'none';
+            }
+        });
+    });
+    
+    const actionButtons = document.querySelectorAll('.action-btn');
+    actionButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            const action = this.title;
+            if (action.includes('Desactivar') || action.includes('Eliminar')) {
+                if (!confirm('¿Estás seguro de realizar esta acción?')) {
+                    e.preventDefault();
+                }
+            }
+        });
+    });
+});
+</script>
+{% endblock %}

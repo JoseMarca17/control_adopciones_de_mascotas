@@ -1,67 +1,718 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}{{ mascota.nombre }} - Adopción de Mascotas{% endblock %}
+{% block title %}{{ mascota.nombre }} - Detalles{% endblock %}
 
 {% block content %}
-<section class="pet-detail">
+<section class="pet-detail-section">
     <div class="container">
-        <div class="pet-detail-content">
-            <div class="pet-image-large">
-                <img src="{{ mascota.foto.url }}" alt="{{ mascota.nombre }}">
+        <!-- Navegación -->
+        <div class="breadcrumb">
+            <a href="{% url 'adopciones:catalog' %}">← Volver al catálogo</a>
+        </div>
+
+        <!-- Contenido principal -->
+        <div class="pet-detail-container">
+            <!-- Imagen de la mascota -->
+            <div class="pet-image-section">
+                <div class="pet-image-wrapper">
+                    {% if mascota.foto %}
+                    <img src="{{ mascota.foto.url }}" alt="{{ mascota.nombre }}" class="pet-main-image">
+                    {% else %}
+                    <img src="{% static 'images/default-pet.jpg' %}" alt="{{ mascota.nombre }}" class="pet-main-image">
+                    {% endif %}
+                    
+                    <!-- Badges superpuestos -->
+                    <div class="image-badges">
+                        <span class="type-badge {% if mascota.tipo_mascota == 'perro' %}dog-type{% else %}cat-type{% endif %}">
+                            {{ mascota.get_tipo_mascota_display }}
+                        </span>
+                        <span class="status-badge {% if mascota.disponible %}available{% else %}adopted{% endif %}">
+                            {% if mascota.disponible %}🟢 Disponible{% else %}🔴 Adoptado{% endif %}
+                        </span>
+                    </div>
+                </div>
             </div>
-            <div class="pet-info-detail">
-                <h1>{{ mascota.nombre }}</h1>
-                <div class="pet-meta">
-                    <span class="pet-type">{{ mascota.get_tipo_mascota_display }}</span>
-                    <span class="pet-breed">{{ mascota.raza }}</span>
-                    <span class="pet-age">{{ mascota.edad }} años</span>
-                    <span class="pet-size">{{ mascota.get_tamaño_display }}</span>
-                </div>
-                
-                <div class="request-stats">
-                    <div class="request-info">
-                        <span class="request-count">{{ cantidad_solicitudes }}</span>
-                        <span class="request-text">personas interesadas</span>
+
+            <!-- Información de la mascota -->
+            <div class="pet-info-section">
+                <!-- Header con nombre y acciones -->
+                <div class="pet-header">
+                    <div class="pet-title">
+                        <h1>{{ mascota.nombre }}</h1>
+                        <div class="pet-subtitle">
+                            <span class="pet-breed">{{ mascota.raza }}</span>
+                            <span class="pet-sex sexo-{{ mascota.sexo }}">
+                                {{ mascota.get_icono_sexo }} {{ mascota.get_sexo_display }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Botones de acción principales -->
+                    <div class="pet-actions">
+                        {% if user.is_authenticated and mascota.disponible %}
+                            {% if user.perfil_adoptante %}
+                            <a href="{% url 'adopciones:solicitud_adopcion' mascota.id %}" class="btn-adopt-now">
+                                🏠 Solicitar Adopción
+                            </a>
+                            {% else %}
+                            <a href="{% url 'adopciones:registrar_adoptante' %}" class="btn-complete-profile">
+                                📝 Completar Perfil
+                            </a>
+                            {% endif %}
+                        {% elif mascota.disponible %}
+                        <a href="{% url 'login' %}?next={{ request.path }}" class="btn-login">
+                            🔐 Iniciar Sesión para Adoptar
+                        </a>
+                        {% endif %}
                     </div>
                 </div>
-                
-                <div class="pet-description-full">
-                    <h3>Sobre {{ mascota.nombre }}</h3>
-                    <p>{{ mascota.descripcion }}</p>
+
+                <!-- Información básica -->
+                <div class="basic-info-grid">
+                    <div class="info-card">
+                        <div class="info-icon">🎂</div>
+                        <div class="info-content">
+                            <h3>Edad</h3>
+                            <p>{{ mascota.edad_display }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-icon">📏</div>
+                        <div class="info-content">
+                            <h3>Tamaño</h3>
+                            <p>{{ mascota.get_tamaño_display }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-icon">📅</div>
+                        <div class="info-content">
+                            <h3>Fecha de Ingreso</h3>
+                            <p>{{ mascota.fecha_ingreso|date:"d/m/Y" }}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="info-card">
+                        <div class="info-icon">👥</div>
+                        <div class="info-content">
+                            <h3>Solicitudes</h3>
+                            <p>{{ cantidad_solicitudes }} en lista de espera</p>
+                        </div>
+                    </div>
                 </div>
-                
-                <div class="pet-medical-info">
-                    <h3>Información Médica</h3>
-                    <div class="medical-badges">
+
+                <!-- Descripción -->
+                <div class="description-section">
+                    <h2>Sobre {{ mascota.nombre }}</h2>
+                    <div class="description-content">
+                        {{ mascota.descripcion|linebreaks }}
+                    </div>
+                </div>
+
+                <!-- Estado de salud -->
+                <div class="health-section">
+                    <h2>Estado de Salud</h2>
+                    <div class="health-grid">
                         {% if mascota.vacunado %}
-                        <span class="medical-badge vaccinated">✓ Vacunado</span>
+                        <div class="health-item vaccinated">
+                            <span class="health-icon">💉</span>
+                            <span class="health-text">Vacunado</span>
+                        </div>
                         {% endif %}
+                        
                         {% if mascota.esterilizado %}
-                        <span class="medical-badge sterilized">✓ Esterilizado</span>
+                        <div class="health-item sterilized">
+                            <span class="health-icon">✂️</span>
+                            <span class="health-text">Esterilizado</span>
+                        </div>
                         {% endif %}
+                        
                         {% if mascota.desparasitado %}
-                        <span class="medical-badge dewormed">✓ Desparasitado</span>
+                        <div class="health-item dewormed">
+                            <span class="health-icon">🐛</span>
+                            <span class="health-text">Desparasitado</span>
+                        </div>
                         {% endif %}
                     </div>
+                    
                     {% if mascota.observaciones_medicas %}
-                    <p class="medical-notes">{{ mascota.observaciones_medicas }}</p>
+                    <div class="medical-notes">
+                        <h3>Observaciones Médicas</h3>
+                        <p>{{ mascota.observaciones_medicas|linebreaks }}</p>
+                    </div>
                     {% endif %}
                 </div>
-                
-                {% if user.is_authenticated and usuario_tiene_perfil_adoptante %}
-                <div class="adoption-section">
-                    <a href="{% url 'adopciones:solicitud_adopcion' mascota.id %}" class="btn btn-primary btn-large">
-                        🏠 Solicitar Adopción
-                    </a>
-                    <p class="help-text">Serás agregado a la lista de espera para esta mascota</p>
+
+                <!-- Información de adopción (sección inferior) -->
+                <div class="adoption-info">
+                    <h2>💝 ¿Quieres adoptar a {{ mascota.nombre }}?</h2>
+                    
+                    {% if mascota.disponible %}
+                        {% if user.is_authenticated %}
+                            {% if user.perfil_adoptante %}
+                            <div class="adoption-steps">
+                                <p>¡{{ mascota.nombre }} está esperando por ti! Haz clic en el botón para iniciar el proceso de adopción.</p>
+                                <a href="{% url 'adopciones:solicitud_adopcion' mascota.id %}" class="btn-primary-large">
+                                    🏠 Comenzar Solicitud de Adopción
+                                </a>
+                                <p class="queue-info">
+                                    <small>Actualmente hay <strong>{{ cantidad_solicitudes }}</strong> persona(s) en lista de espera para esta mascota.</small>
+                                </p>
+                            </div>
+                            {% else %}
+                            <div class="profile-required">
+                                <p>Para solicitar la adopción de {{ mascota.nombre }}, primero necesitas completar tu perfil de adoptante.</p>
+                                <a href="{% url 'adopciones:registrar_adoptante' %}" class="btn-warning-large">
+                                    📝 Completar Mi Perfil
+                                </a>
+                            </div>
+                            {% endif %}
+                        {% else %}
+                        <div class="login-required">
+                            <p>Para adoptar a {{ mascota.nombre }}, necesitas iniciar sesión en tu cuenta.</p>
+                            <a href="{% url 'login' %}?next={{ request.path }}" class="btn-secondary-large">
+                                🔐 Iniciar Sesión
+                            </a>
+                            <p class="register-link">
+                                ¿No tienes cuenta? <a href="{% url 'adopciones:registrar_usuario' %}">Regístrate aquí</a>
+                            </p>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                    <div class="already-adopted">
+                        <p>🎉 <strong>{{ mascota.nombre }}</strong> ya encontró un hogar lleno de amor. ¡Gracias por tu interés!</p>
+                        <p>Conoce a otros animales que están esperando por una familia.</p>
+                        <a href="{% url 'adopciones:catalog' %}" class="btn-secondary-large">
+                            👀 Ver Otras Mascotas
+                        </a>
+                    </div>
+                    {% endif %}
                 </div>
-                {% elif not user.is_authenticated %}
-                <div class="login-prompt">
-                    <p>¿Te interesa adoptar a {{ mascota.nombre }}? <a href="{% url 'login' %}">Inicia sesión</a> para solicitar la adopción.</p>
-                </div>
-                {% endif %}
             </div>
         </div>
     </div>
 </section>
+
+<style>
+/* ========== SECCIÓN PRINCIPAL ========== */
+.pet-detail-section {
+    padding: 2rem 0;
+    background: #f8fafc;
+}
+
+.breadcrumb {
+    margin-bottom: 2rem;
+}
+
+.breadcrumb a {
+    color: #4a90e2;
+    text-decoration: none;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.breadcrumb a:hover {
+    color: #3182ce;
+    text-decoration: underline;
+}
+
+/* ========== CONTENEDOR PRINCIPAL ========== */
+.pet-detail-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+    background: white;
+    border-radius: 16px;
+    padding: 2rem;
+    box-shadow: 0 8px 30px rgba(0,0,0,0.08);
+}
+
+@media (max-width: 992px) {
+    .pet-detail-container {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+}
+
+/* ========== IMAGEN ========== */
+.pet-image-section {
+    border-radius: 12px;
+    overflow: hidden;
+}
+
+.pet-image-wrapper {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+}
+
+.pet-main-image {
+    width: 100%;
+    height: auto;
+    display: block;
+    border-radius: 12px;
+    transition: transform 0.3s ease;
+}
+
+.pet-image-wrapper:hover .pet-main-image {
+    transform: scale(1.02);
+}
+
+.image-badges {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    right: 1rem;
+    display: flex;
+    justify-content: space-between;
+}
+
+.type-badge, .status-badge {
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: white;
+    backdrop-filter: blur(10px);
+    background: rgba(0,0,0,0.7);
+}
+
+.dog-type {
+    background: linear-gradient(135deg, rgba(229, 62, 62, 0.9), rgba(197, 48, 48, 0.9));
+}
+
+.cat-type {
+    background: linear-gradient(135deg, rgba(128, 90, 213, 0.9), rgba(107, 70, 193, 0.9));
+}
+
+.available {
+    background: linear-gradient(135deg, rgba(56, 161, 105, 0.9), rgba(47, 133, 90, 0.9));
+}
+
+.adopted {
+    background: linear-gradient(135deg, rgba(113, 128, 150, 0.9), rgba(74, 85, 104, 0.9));
+}
+
+/* ========== INFORMACIÓN ========== */
+.pet-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 2rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.pet-title h1 {
+    color: #2d3748;
+    font-size: 2.2rem;
+    margin-bottom: 0.5rem;
+    font-weight: 800;
+}
+
+.pet-subtitle {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+.pet-breed {
+    color: #718096;
+    font-size: 1.1rem;
+    font-weight: 500;
+}
+
+.pet-sex {
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.sexo-macho {
+    background: #bee3f8;
+    color: #2c5282;
+}
+
+.sexo-hembra {
+    background: #fed7e2;
+    color: #97266d;
+}
+
+/* ========== ACCIONES (ESQUINA SUPERIOR DERECHA) ========== */
+.pet-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 200px;
+}
+
+.btn-adopt-now, .btn-complete-profile, .btn-login {
+    padding: 0.8rem 1.5rem;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.95rem;
+    text-align: center;
+    transition: all 0.2s ease;
+    white-space: nowrap;
+    border: none;
+    cursor: pointer;
+    width: 100%;
+}
+
+.btn-adopt-now {
+    background: linear-gradient(135deg, #4299e1, #3182ce);
+    color: white;
+}
+
+.btn-adopt-now:hover {
+    background: linear-gradient(135deg, #3182ce, #2c5282);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(66, 153, 225, 0.3);
+}
+
+.btn-complete-profile {
+    background: linear-gradient(135deg, #ed8936, #dd6b20);
+    color: white;
+}
+
+.btn-complete-profile:hover {
+    background: linear-gradient(135deg, #dd6b20, #c05621);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(237, 137, 54, 0.3);
+}
+
+.btn-login {
+    background: linear-gradient(135deg, #718096, #4a5568);
+    color: white;
+}
+
+.btn-login:hover {
+    background: linear-gradient(135deg, #4a5568, #2d3748);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(113, 128, 150, 0.3);
+}
+
+/* ========== INFORMACIÓN BÁSICA ========== */
+.basic-info-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.info-card {
+    background: #f7fafc;
+    border-radius: 10px;
+    padding: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    border: 1px solid #e2e8f0;
+    transition: all 0.2s ease;
+}
+
+.info-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    border-color: #cbd5e0;
+}
+
+.info-icon {
+    font-size: 1.8rem;
+    width: 50px;
+    height: 50px;
+    background: white;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #e2e8f0;
+}
+
+.info-content h3 {
+    color: #4a5568;
+    font-size: 0.9rem;
+    margin-bottom: 0.3rem;
+    font-weight: 600;
+}
+
+.info-content p {
+    color: #2d3748;
+    font-size: 1rem;
+    font-weight: 700;
+    margin: 0;
+}
+
+/* ========== DESCRIPCIÓN ========== */
+.description-section {
+    margin-bottom: 2rem;
+}
+
+.description-section h2 {
+    color: #2d3748;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.description-content {
+    color: #4a5568;
+    font-size: 1rem;
+    line-height: 1.6;
+    background: #f7fafc;
+    padding: 1.5rem;
+    border-radius: 10px;
+    border-left: 4px solid #4299e1;
+}
+
+/* ========== SALUD ========== */
+.health-section {
+    margin-bottom: 2rem;
+}
+
+.health-section h2 {
+    color: #2d3748;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.health-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    margin-bottom: 1.5rem;
+}
+
+.health-item {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+    border-radius: 25px;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.health-icon {
+    font-size: 1.2rem;
+}
+
+.vaccinated {
+    background: #e6fffa;
+    color: #285e61;
+    border: 2px solid #81e6d9;
+}
+
+.sterilized {
+    background: #faf5ff;
+    color: #553c9a;
+    border: 2px solid #d6bcfa;
+}
+
+.dewormed {
+    background: #fffaf0;
+    color: #744210;
+    border: 2px solid #fbd38d;
+}
+
+.medical-notes {
+    background: #fff5f5;
+    border: 1px solid #fed7d7;
+    border-radius: 10px;
+    padding: 1.5rem;
+    margin-top: 1rem;
+}
+
+.medical-notes h3 {
+    color: #c53030;
+    font-size: 1.1rem;
+    margin-bottom: 0.8rem;
+    font-weight: 600;
+}
+
+.medical-notes p {
+    color: #742a2a;
+    font-size: 0.95rem;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* ========== ADOPCIÓN (SECCIÓN INFERIOR) ========== */
+.adoption-info {
+    background: linear-gradient(135deg, #f7fafc, #edf2f7);
+    border-radius: 12px;
+    padding: 2rem;
+    border: 2px solid #e2e8f0;
+    margin-top: 2rem;
+}
+
+.adoption-info h2 {
+    color: #2d3748;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    font-weight: 700;
+    text-align: center;
+}
+
+.adoption-steps, .profile-required, .login-required, .already-adopted {
+    text-align: center;
+}
+
+.adoption-steps p, .profile-required p, .login-required p, .already-adopted p {
+    color: #4a5568;
+    font-size: 1rem;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.btn-primary-large, .btn-warning-large, .btn-secondary-large {
+    display: inline-block;
+    padding: 1rem 2rem;
+    border-radius: 10px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+    margin-bottom: 1rem;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary-large {
+    background: linear-gradient(135deg, #4299e1, #3182ce);
+    color: white;
+}
+
+.btn-primary-large:hover {
+    background: linear-gradient(135deg, #3182ce, #2c5282);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(66, 153, 225, 0.3);
+}
+
+.btn-warning-large {
+    background: linear-gradient(135deg, #ed8936, #dd6b20);
+    color: white;
+}
+
+.btn-warning-large:hover {
+    background: linear-gradient(135deg, #dd6b20, #c05621);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(237, 137, 54, 0.3);
+}
+
+.btn-secondary-large {
+    background: linear-gradient(135deg, #718096, #4a5568);
+    color: white;
+}
+
+.btn-secondary-large:hover {
+    background: linear-gradient(135deg, #4a5568, #2d3748);
+    transform: translateY(-3px);
+    box-shadow: 0 8px 20px rgba(113, 128, 150, 0.3);
+}
+
+.queue-info {
+    background: #e6fffa;
+    border: 1px solid #81e6d9;
+    border-radius: 8px;
+    padding: 0.8rem;
+    margin-top: 1rem;
+}
+
+.queue-info small {
+    color: #285e61;
+}
+
+.register-link {
+    margin-top: 1rem;
+    color: #718096;
+}
+
+.register-link a {
+    color: #4299e1;
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.register-link a:hover {
+    text-decoration: underline;
+}
+
+/* ========== RESPONSIVE ========== */
+@media (max-width: 768px) {
+    .pet-header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .pet-actions {
+        width: 100%;
+        min-width: auto;
+    }
+    
+    .pet-actions a {
+        width: 100%;
+    }
+    
+    .basic-info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .pet-title h1 {
+        font-size: 1.8rem;
+    }
+    
+    .pet-subtitle {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .adoption-info {
+        padding: 1.5rem;
+    }
+    
+    .btn-primary-large, .btn-warning-large, .btn-secondary-large {
+        padding: 0.8rem 1.5rem;
+        width: 100%;
+    }
+}
+
+@media (max-width: 480px) {
+    .pet-detail-container {
+        padding: 1rem;
+    }
+    
+    .pet-title h1 {
+        font-size: 1.5rem;
+    }
+    
+    .image-badges {
+        flex-direction: column;
+        gap: 0.5rem;
+        align-items: flex-start;
+    }
+    
+    .type-badge, .status-badge {
+        font-size: 0.75rem;
+        padding: 0.4rem 0.8rem;
+    }
+}
+</style>
 {% endblock %}

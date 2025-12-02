@@ -1,0 +1,197 @@
+{% extends 'base.html' %}
+
+{% block title %}Crear Nuevo Administrador{% endblock %}
+
+{% block content %}
+<section class="create-admin-section">
+    <div class="container">
+        <div class="admin-form-card">
+            <div class="admin-form-header">
+                <div class="admin-form-icon">👨‍💼</div>
+                <h1>Crear Nuevo Administrador</h1>
+                <p class="admin-form-subtitle">
+                    Completa los datos del nuevo administrador del sistema.
+                </p>
+            </div>
+            
+            {% if messages %}
+            <div class="messages-container">
+                {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <form method="post" class="admin-form">
+                {% csrf_token %}
+                
+                <h3 class="section-title">📋 Datos del Nuevo Administrador</h3>
+                
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label for="{{ form.email.id_for_label }}" class="form-label">
+                            📧 Correo Electrónico *
+                        </label>
+                        {{ form.email }}
+                        {% if form.email.errors %}
+                        <div class="error">{{ form.email.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="{{ form.first_name.id_for_label }}" class="form-label">
+                                👤 Nombre *
+                            </label>
+                            {{ form.first_name }}
+                            {% if form.first_name.errors %}
+                            <div class="error">{{ form.first_name.errors }}</div>
+                            {% endif %}
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.last_name.id_for_label }}" class="form-label">
+                                👤 Apellido *
+                            </label>
+                            {{ form.last_name }}
+                            {% if form.last_name.errors %}
+                            <div class="error">{{ form.last_name.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="{{ form.telefono.id_for_label }}" class="form-label">
+                            📞 Teléfono
+                        </label>
+                        {{ form.telefono }}
+                        {% if form.telefono.errors %}
+                        <div class="error">{{ form.telefono.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="{{ form.password1.id_for_label }}" class="form-label">
+                                🔑 Contraseña *
+                            </label>
+                            {{ form.password1 }}
+                            {% if form.password1.errors %}
+                            <div class="error">{{ form.password1.errors }}</div>
+                            {% endif %}
+                            <small class="form-text">{{ form.password1.help_text }}</small>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="{{ form.password2.id_for_label }}" class="form-label">
+                                🔑 Confirmar Contraseña *
+                            </label>
+                            {{ form.password2 }}
+                            {% if form.password2.errors %}
+                            <div class="error">{{ form.password2.errors }}</div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                
+                <h3 class="section-title mt-4">🔒 Verificación de Seguridad</h3>
+                
+                <div class="security-section">
+                    <div class="form-group">
+                        <label for="{{ form.admin_password.id_for_label }}" class="form-label">
+                            🛡️ Tu Contraseña de Administrador *
+                        </label>
+                        {{ form.admin_password }}
+                        {% if form.admin_password.errors %}
+                        <div class="error">{{ form.admin_password.errors }}</div>
+                        {% endif %}
+                        <small class="form-text">{{ form.admin_password.help_text }}</small>
+                    </div>
+                </div>
+                
+                <div class="admin-info-card">
+                    <h4>⚠️ Información Importante</h4>
+                    <p>El nuevo usuario tendrá acceso completo al sistema de administración, incluyendo:</p>
+                    <ul>
+                        <li>✅ Crear, editar y eliminar mascotas</li>
+                        <li>✅ Procesar solicitudes de adopción</li>
+                        <li>✅ Generar reportes y estadísticas</li>
+                        <li>✅ Acceder al panel de administración</li>
+                    </ul>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-success">
+                        👑 Crear Administrador
+                    </button>
+                    <a href="{% url 'adopciones:listar_administradores' %}" class="btn btn-secondary">
+                        ↩️ Volver a la lista
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</section>
+
+<style>
+/* Tus estilos CSS aquí (igual que antes) */
+.create-admin-section {
+    padding: 3rem 0;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    min-height: 80vh;
+}
+
+.admin-form-card {
+    max-width: 800px;
+    margin: 0 auto;
+    background: white;
+    border-radius: 20px;
+    padding: 3rem;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+    border: 1px solid #e9ecef;
+}
+
+.admin-form-header {
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.admin-form-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.admin-form-header h1 {
+    color: #2c3e50;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+}
+
+.admin-form-subtitle {
+    color: #6c757d;
+    font-size: 1.1rem;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+.section-title {
+    color: #2c3e50;
+    font-size: 1.3rem;
+    margin: 1.5rem 0 1rem 0;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #3498db;
+}
+
+.security-section {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 10px;
+    border-left: 4px solid #e74c3c;
+    margin: 1.5rem 0;
+}
+
+/* Resto de tus estilos... */
+</style>
+{% endblock %}
